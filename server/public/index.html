@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>湘超赛果管理</title>
+    <title>湖南足球赛果管理</title>
     <style>
       :root {
         --chili: #d7261e;
@@ -30,9 +30,9 @@
         flex-wrap: wrap;
         gap: 10px;
         align-items: center;
-        padding: 16px 28px;
+        padding: 16px 28px 8px;
       }
-      .bar input, .bar select, .row input, .row select, .row button {
+      .bar input, .bar select, .row input, .row select, .row button, .filters button, .bar button {
         border: 1px solid rgba(20, 16, 17, 0.12);
         border-radius: 8px;
         padding: 8px 10px;
@@ -41,9 +41,9 @@
         font: inherit;
         font-size: 13px;
       }
-      .bar input[type="password"] { width: 170px; }
-      .bar input[type="search"] { flex: 1; min-width: 180px; }
-      .bar button, .row button {
+      .bar input[type="password"] { width: 190px; }
+      .bar input[type="search"] { flex: 1; min-width: 160px; }
+      .bar button, .row button, .filters button.active {
         border: none;
         background: var(--ink);
         color: #fff;
@@ -51,6 +51,9 @@
         cursor: pointer;
       }
       .bar button:hover, .row button:hover { background: var(--chili); }
+      .filters { display: flex; gap: 8px; padding: 0 28px 10px; flex-wrap: wrap; }
+      .filters button { cursor: pointer; background: #fff; color: var(--ink); }
+      .filters button.active { background: var(--ink); color: #fff; }
       main { padding: 0 28px 40px; }
       table {
         width: 100%;
@@ -65,8 +68,10 @@
       tr:last-child td { border-bottom: none; }
       .teams { font-weight: 700; }
       .goal { width: 54px; text-align: center; }
-      .status { width: 96px; }
+      .minute, .attendance { width: 74px; }
+      .status { width: 104px; }
       .muted { color: var(--muted); font-size: 11px; }
+      .live { color: var(--chili); font-weight: 700; }
       .toast {
         position: fixed;
         right: 20px;
@@ -83,51 +88,80 @@
       }
       .toast.show { opacity: 1; transform: none; }
       .hint { padding: 0 28px 10px; color: var(--muted); font-size: 12px; line-height: 1.6; }
-      @media (max-width: 700px) {
-        .bar, main, .hint { padding-left: 14px; padding-right: 14px; }
-        th:nth-child(1), td:nth-child(1), th:nth-child(2), td:nth-child(2) { display: none; }
+      .log { margin-top: 18px; display: none; }
+      .log.open { display: block; }
+      .log h2 { font-size: 14px; margin: 0 0 8px; }
+      .log ol { margin: 0; padding: 14px 18px 14px 34px; background: #fff; border-radius: 12px; font-size: 12px; line-height: 1.9; }
+      .log code { font-size: 11px; color: var(--muted); }
+      @media (max-width: 760px) {
+        .bar, main, .hint, .filters { padding-left: 14px; padding-right: 14px; }
+        th:nth-child(2), td:nth-child(2) { display: none; }
+        .minute, .attendance { width: 58px; }
       }
     </style>
   </head>
   <body>
     <header>
-      <h1>湘超赛果管理</h1>
-      <p>修改状态和比分后会写入 server/data.json，小程序下次同步即可看到。</p>
+      <h1>湖南足球赛果管理</h1>
+      <p>保存前自动备份 data.json；比分、状态、live 分钟和现场人数会立即同步到 App。</p>
     </header>
 
     <div class="bar">
-      <input id="token" type="password" placeholder="管理令牌" value="dev-token" />
-      <input id="search" type="search" placeholder="搜索球队 / 轮次" />
+      <input id="token" type="password" placeholder="管理令牌" autocomplete="off" />
+      <input id="search" type="search" placeholder="搜索球队 / 轮次 / 日期" />
       <button id="refresh">刷新</button>
+      <button id="log-toggle">操作记录</button>
+    </div>
+    <div class="filters">
+      <button data-filter="all" class="active">全部</button>
+      <button data-filter="live">进行中</button>
+      <button data-filter="upcoming">待开赛</button>
+      <button data-filter="finished">已完场</button>
     </div>
     <div class="hint">
-      上线前请用环境变量 <code>ADMIN_TOKEN</code> 设置强令牌，并只在内网或登录保护后暴露此页面。
-      当前版本管理端不做登录，令牌就是唯一凭证。
+      令牌只保存在当前标签页（sessionStorage），关闭标签页即清除。上线请用环境变量
+      <code>ADMIN_TOKEN</code> 设置强令牌，并把后台限制在内网或登录保护后。
     </div>
 
     <main>
       <table>
         <thead>
           <tr>
-            <th>轮次</th>
+            <th>比赛</th>
             <th>日期</th>
             <th>对阵</th>
             <th>主队</th>
             <th>客队</th>
+            <th>分钟</th>
+            <th>现场人数</th>
             <th>状态</th>
             <th></th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
       </table>
+
+      <section id="log" class="log">
+        <h2>最近操作</h2>
+        <ol id="log-rows"></ol>
+      </section>
     </main>
 
     <div id="toast" class="toast"></div>
 
     <script>
       let matches = []
+      let teamNames = {}
+      let filter = 'all'
+      const tokenInput = document.getElementById('token')
+      tokenInput.value = sessionStorage.getItem('xc-admin-token') || ''
+      tokenInput.addEventListener('input', () => {
+        sessionStorage.setItem('xc-admin-token', tokenInput.value)
+      })
 
       const $ = (id) => document.getElementById(id)
+      const esc = (value) =>
+        String(value).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]))
       const toast = (text) => {
         const el = $('toast')
         el.textContent = text
@@ -135,29 +169,41 @@
         setTimeout(() => el.classList.remove('show'), 1800)
       }
 
-      function scoreOf(match) {
-        const goals = (side) =>
-          match.events.filter((e) => e.type === 'goal' && e.side === side).length
-        return [goals('home'), goals('away')]
+      const cityOf = (id) => teamNames[id] || id
+
+      function stageOf(match) {
+        return match.phase === 'knockout' ? match.stage || '淘汰赛' : `第${match.round}轮`
+      }
+
+      function visibleMatches() {
+        const q = $('search').value.trim()
+        return matches
+          .filter((m) => filter === 'all' || m.status === filter)
+          .filter((m) => {
+            if (!q) return true
+            return `${cityOf(m.home)} ${cityOf(m.away)} ${m.round} ${m.date} ${stageOf(m)}`.includes(q)
+          })
+          .sort((a, b) => {
+            const rank = { live: 0, upcoming: 1, finished: 2 }
+            if (rank[a.status] !== rank[b.status]) return rank[a.status] - rank[b.status]
+            if (a.date !== b.date) return a.status === 'finished' ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)
+            return a.time.localeCompare(b.time)
+          })
       }
 
       function render() {
-        const q = $('search').value.trim()
-        const rows = matches
-          .filter((m) => {
-            if (!q) return true
-            const names = `${m.home} ${m.away} ${m.round} ${m.date}`
-            return names.includes(q)
-          })
+        $('rows').innerHTML = visibleMatches()
           .map((m) => {
-            const [home, away] = scoreOf(m)
+            const live = m.status === 'live'
             return `
               <tr data-id="${m.id}">
-                <td class="muted">第${m.round}轮</td>
+                <td class="muted">${esc(stageOf(m))}</td>
                 <td class="muted">${m.date} ${m.time}</td>
-                <td class="teams">${m.home} vs ${m.away}</td>
-                <td><input class="goal" type="number" min="0" max="20" value="${home}" data-side="home" /></td>
-                <td><input class="goal" type="number" min="0" max="20" value="${away}" data-side="away" /></td>
+                <td class="teams">${esc(cityOf(m.home))} vs ${esc(cityOf(m.away))}</td>
+                <td><input class="goal" type="number" min="0" max="20" value="${m.homeGoals}" data-side="home" /></td>
+                <td><input class="goal" type="number" min="0" max="20" value="${m.awayGoals}" data-side="away" /></td>
+                <td><input class="minute" type="number" min="0" max="90" value="${live ? m.startMinute ?? 0 : ''}" placeholder="—" ${live ? '' : 'disabled'} /></td>
+                <td><input class="attendance" type="number" min="0" max="200000" value="${m.attendance || ''}" placeholder="未知" /></td>
                 <td>
                   <select class="status">
                     ${['upcoming', 'live', 'finished']
@@ -169,16 +215,52 @@
               </tr>
             `
           })
-        $('rows').innerHTML = rows.join('')
+          .join('')
+        if (!visibleMatches().length) {
+          $('rows').innerHTML = '<tr><td colspan="9" class="muted">没有符合条件的比赛。</td></tr>'
+        }
       }
 
       async function load() {
-        const res = await fetch('/api/matches')
+        const res = await fetch('/api/league')
         if (!res.ok) throw new Error('加载失败')
         const data = await res.json()
         matches = data.matches
+        teamNames = Object.fromEntries(data.teams.map((team) => [team.id, team.city]))
         render()
       }
+
+      async function loadLog() {
+        if (!$('log').classList.contains('open')) return
+        if (!tokenInput.value) {
+          $('log-rows').innerHTML = '<li class="muted">先填入管理令牌。</li>'
+          return
+        }
+        const res = await fetch('/api/admin/log', { headers: { 'x-admin-token': tokenInput.value } })
+        if (!res.ok) {
+          $('log-rows').innerHTML = '<li class="muted">令牌无效，无法读取操作记录。</li>'
+          return
+        }
+        const data = await res.json()
+        $('log-rows').innerHTML = data.entries.length
+          ? data.entries
+              .map((entry) => {
+                const before = entry.before
+                const after = entry.after
+                return `<li>${new Date(entry.at).toLocaleString('zh-CN')} · <code>${esc(entry.matchId)}</code> · ${esc(before.status)}→${esc(after.status)} · ${before.homeGoals}:${before.awayGoals}→${after.homeGoals}:${after.awayGoals}${after.startMinute === undefined ? '' : ` · ${after.startMinute}'`}</li>`
+              })
+              .join('')
+          : '<li class="muted">还没有操作记录。</li>'
+      }
+
+      $('rows').addEventListener('change', (event) => {
+        if (!event.target.classList.contains('status')) return
+        const tr = event.target.closest('tr')
+        const minute = tr.querySelector('.minute')
+        const live = event.target.value === 'live'
+        minute.disabled = !live
+        if (live && minute.value === '') minute.value = 0
+      })
 
       $('rows').addEventListener('click', async (event) => {
         const button = event.target.closest('.save')
@@ -188,20 +270,34 @@
         const homeGoals = Number(tr.querySelector('[data-side="home"]').value)
         const awayGoals = Number(tr.querySelector('[data-side="away"]').value)
         const status = tr.querySelector('.status').value
+        const minuteRaw = tr.querySelector('.minute').value
+        const attendanceRaw = tr.querySelector('.attendance').value
+        const body = {
+          status,
+          homeGoals,
+          awayGoals,
+          startMinute: status === 'live' ? Number(minuteRaw || 0) : undefined,
+          attendance: attendanceRaw === '' ? 0 : Number(attendanceRaw),
+        }
+        if (!tokenInput.value) {
+          toast('请先填入管理令牌')
+          return
+        }
         button.disabled = true
         try {
           const res = await fetch(`/api/admin/matches/${id}`, {
             method: 'POST',
             headers: {
               'content-type': 'application/json',
-              'x-admin-token': $('token').value,
+              'x-admin-token': tokenInput.value,
             },
-            body: JSON.stringify({ status, homeGoals, awayGoals }),
+            body: JSON.stringify(body),
           })
           const data = await res.json()
           if (!res.ok) throw new Error(data.error || '保存失败')
           toast(`已保存 ${id}：${homeGoals}:${awayGoals}`)
           await load()
+          await loadLog()
         } catch (e) {
           toast(e.message)
         } finally {
@@ -209,7 +305,24 @@
         }
       })
 
-      $('refresh').addEventListener('click', () => load().catch((e) => toast(e.message)))
+      document.querySelector('.filters').addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-filter]')
+        if (!button) return
+        filter = button.dataset.filter
+        document.querySelectorAll('.filters button').forEach((item) => {
+          item.classList.toggle('active', item === button)
+        })
+        render()
+      })
+
+      $('refresh').addEventListener('click', () => {
+        load().catch((e) => toast(e.message))
+        loadLog()
+      })
+      $('log-toggle').addEventListener('click', () => {
+        $('log').classList.toggle('open')
+        loadLog()
+      })
       $('search').addEventListener('input', render)
       load().catch((e) => toast(e.message))
     </script>

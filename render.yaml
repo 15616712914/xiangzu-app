@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: xiangchao-api
+    runtime: docker
+    plan: starter
+    dockerContext: .
+    dockerfilePath: ./server/Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: APPLE_CLIENT_ID
+        value: com.xiangchao.app
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_MODEL
+        value: deepseek-chat
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1

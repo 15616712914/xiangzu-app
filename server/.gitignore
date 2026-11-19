@@ -2,3 +2,8 @@ node_modules/
 data.json.tmp
 *.log
 .DS_Store
+fans.json
+fans.json.tmp
+.env
+backups/
+logs/

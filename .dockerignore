@@ -1,0 +1,10 @@
+**/node_modules
+**/.git
+**/.DS_Store
+server/.env
+server/fans.json
+server/fans.json.tmp
+server/data.json.tmp
+server/backups
+server/logs
+ios/appstore/screenshots
