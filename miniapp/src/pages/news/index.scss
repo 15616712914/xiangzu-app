@@ -1,0 +1,123 @@
+.news-page {
+  padding-bottom: 32px;
+}
+
+.news-cover {
+  position: relative;
+  display: flex;
+  height: 190px;
+  align-items: flex-end;
+  padding: 20px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #2a1d1a, #8a2219 55%, #d7261e);
+}
+
+.news-cover-tag {
+  position: relative;
+  z-index: 2;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.news-cover-mark {
+  position: absolute;
+  top: -30px;
+  right: 10px;
+  color: rgba(255, 255, 255, 0.14);
+  font-size: 180px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.news-body {
+  padding: 18px 20px 0;
+}
+
+.news-title {
+  display: block;
+  color: #141011;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.45;
+}
+
+.news-info {
+  display: block;
+  margin-top: 8px;
+  color: rgba(20, 16, 17, 0.35);
+  font-size: 10px;
+}
+
+.news-lead {
+  display: block;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-left: 3px solid #d7261e;
+  border-radius: 0 10px 10px 0;
+  background: rgba(215, 38, 30, 0.06);
+  color: rgba(20, 16, 17, 0.7);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.news-para {
+  display: block;
+  margin-top: 14px;
+  color: rgba(20, 16, 17, 0.8);
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+.news-disclaimer {
+  display: block;
+  margin-top: 20px;
+  color: rgba(20, 16, 17, 0.35);
+  font-size: 10px;
+}
+
+.related {
+  margin-top: 26px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(20, 16, 17, 0.08);
+}
+
+.related-title {
+  display: block;
+  margin-bottom: 8px;
+  color: #141011;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.related-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(20, 16, 17, 0.05);
+}
+
+.related-row:last-child {
+  border-bottom: none;
+}
+
+.related-tag {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(215, 38, 30, 0.1);
+  color: #d7261e;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.related-name {
+  flex: 1;
+  color: rgba(20, 16, 17, 0.75);
+  font-size: 12px;
+  line-height: 1.5;
+}

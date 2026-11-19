@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>湘超赛果管理</title>
+    <style>
+      :root {
+        --chili: #d7261e;
+        --ink: #141011;
+        --paper: #f3eee6;
+        --muted: rgba(20, 16, 17, 0.45);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      }
+      header {
+        padding: 22px 28px;
+        background: var(--ink);
+        color: #fff;
+      }
+      header h1 { margin: 0; font-size: 22px; }
+      header p { margin: 6px 0 0; color: rgba(255, 255, 255, 0.55); font-size: 12px; }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        padding: 16px 28px;
+      }
+      .bar input, .bar select, .row input, .row select, .row button {
+        border: 1px solid rgba(20, 16, 17, 0.12);
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: #fff;
+        color: var(--ink);
+        font: inherit;
+        font-size: 13px;
+      }
+      .bar input[type="password"] { width: 170px; }
+      .bar input[type="search"] { flex: 1; min-width: 180px; }
+      .bar button, .row button {
+        border: none;
+        background: var(--ink);
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .bar button:hover, .row button:hover { background: var(--chili); }
+      main { padding: 0 28px 40px; }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        font-size: 13px;
+      }
+      th, td { padding: 9px 10px; text-align: left; border-bottom: 1px solid rgba(20, 16, 17, 0.06); }
+      th { color: var(--muted); font-size: 11px; font-weight: 600; background: #faf7f2; }
+      tr:last-child td { border-bottom: none; }
+      .teams { font-weight: 700; }
+      .goal { width: 54px; text-align: center; }
+      .status { width: 96px; }
+      .muted { color: var(--muted); font-size: 11px; }
+      .toast {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: var(--ink);
+        color: #fff;
+        font-size: 13px;
+        opacity: 0;
+        transform: translateY(8px);
+        transition: 0.2s;
+        pointer-events: none;
+      }
+      .toast.show { opacity: 1; transform: none; }
+      .hint { padding: 0 28px 10px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+      @media (max-width: 700px) {
+        .bar, main, .hint { padding-left: 14px; padding-right: 14px; }
+        th:nth-child(1), td:nth-child(1), th:nth-child(2), td:nth-child(2) { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>湘超赛果管理</h1>
+      <p>修改状态和比分后会写入 server/data.json，小程序下次同步即可看到。</p>
+    </header>
+
+    <div class="bar">
+      <input id="token" type="password" placeholder="管理令牌" value="dev-token" />
+      <input id="search" type="search" placeholder="搜索球队 / 轮次" />
+      <button id="refresh">刷新</button>
+    </div>
+    <div class="hint">
+      上线前请用环境变量 <code>ADMIN_TOKEN</code> 设置强令牌，并只在内网或登录保护后暴露此页面。
+      当前版本管理端不做登录，令牌就是唯一凭证。
+    </div>
+
+    <main>
+      <table>
+        <thead>
+          <tr>
+            <th>轮次</th>
+            <th>日期</th>
+            <th>对阵</th>
+            <th>主队</th>
+            <th>客队</th>
+            <th>状态</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </main>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+      let matches = []
+
+      const $ = (id) => document.getElementById(id)
+      const toast = (text) => {
+        const el = $('toast')
+        el.textContent = text
+        el.classList.add('show')
+        setTimeout(() => el.classList.remove('show'), 1800)
+      }
+
+      function scoreOf(match) {
+        const goals = (side) =>
+          match.events.filter((e) => e.type === 'goal' && e.side === side).length
+        return [goals('home'), goals('away')]
+      }
+
+      function render() {
+        const q = $('search').value.trim()
+        const rows = matches
+          .filter((m) => {
+            if (!q) return true
+            const names = `${m.home} ${m.away} ${m.round} ${m.date}`
+            return names.includes(q)
+          })
+          .map((m) => {
+            const [home, away] = scoreOf(m)
+            return `
+              <tr data-id="${m.id}">
+                <td class="muted">第${m.round}轮</td>
+                <td class="muted">${m.date} ${m.time}</td>
+                <td class="teams">${m.home} vs ${m.away}</td>
+                <td><input class="goal" type="number" min="0" max="20" value="${home}" data-side="home" /></td>
+                <td><input class="goal" type="number" min="0" max="20" value="${away}" data-side="away" /></td>
+                <td>
+                  <select class="status">
+                    ${['upcoming', 'live', 'finished']
+                      .map((s) => `<option value="${s}" ${m.status === s ? 'selected' : ''}>${s}</option>`)
+                      .join('')}
+                  </select>
+                </td>
+                <td><button class="save">保存</button></td>
+              </tr>
+            `
+          })
+        $('rows').innerHTML = rows.join('')
+      }
+
+      async function load() {
+        const res = await fetch('/api/matches')
+        if (!res.ok) throw new Error('加载失败')
+        const data = await res.json()
+        matches = data.matches
+        render()
+      }
+
+      $('rows').addEventListener('click', async (event) => {
+        const button = event.target.closest('.save')
+        if (!button) return
+        const tr = button.closest('tr')
+        const id = tr.dataset.id
+        const homeGoals = Number(tr.querySelector('[data-side="home"]').value)
+        const awayGoals = Number(tr.querySelector('[data-side="away"]').value)
+        const status = tr.querySelector('.status').value
+        button.disabled = true
+        try {
+          const res = await fetch(`/api/admin/matches/${id}`, {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              'x-admin-token': $('token').value,
+            },
+            body: JSON.stringify({ status, homeGoals, awayGoals }),
+          })
+          const data = await res.json()
+          if (!res.ok) throw new Error(data.error || '保存失败')
+          toast(`已保存 ${id}：${homeGoals}:${awayGoals}`)
+          await load()
+        } catch (e) {
+          toast(e.message)
+        } finally {
+          button.disabled = false
+        }
+      })
+
+      $('refresh').addEventListener('click', () => load().catch((e) => toast(e.message)))
+      $('search').addEventListener('input', render)
+      load().catch((e) => toast(e.message))
+    </script>
+  </body>
+</html>

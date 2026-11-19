@@ -1,0 +1,153 @@
+.search-page {
+  padding-bottom: 24px;
+}
+
+.search-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 16px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  background: #f3eee6;
+}
+
+.search-box {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(20, 16, 17, 0.04), 0 12px 28px -16px rgba(20, 16, 17, 0.22);
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.search-clear {
+  display: flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(20, 16, 17, 0.06);
+}
+
+.search-cancel {
+  flex-shrink: 0;
+  color: rgba(20, 16, 17, 0.6);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.search-body {
+  padding: 12px 20px 0;
+}
+
+.search-label {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(20, 16, 17, 0.4);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.hot-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hot-tag {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #fff;
+  color: rgba(20, 16, 17, 0.65);
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(20, 16, 17, 0.04);
+}
+
+.search-tip {
+  display: block;
+  margin-top: 14px;
+  color: rgba(20, 16, 17, 0.35);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.search-empty {
+  display: block;
+  padding: 30px 0;
+  color: rgba(20, 16, 17, 0.35);
+  font-size: 12px;
+  text-align: center;
+}
+
+.search-group {
+  margin-bottom: 16px;
+}
+
+.search-group-title {
+  display: block;
+  margin-bottom: 6px;
+  color: rgba(20, 16, 17, 0.4);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.search-list {
+  overflow: hidden;
+  padding: 0 14px;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(20, 16, 17, 0.05);
+}
+
+.search-row:last-child {
+  border-bottom: none;
+}
+
+.search-row-title {
+  display: block;
+  color: #141011;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.search-row-sub {
+  display: block;
+  margin-top: 2px;
+  color: rgba(20, 16, 17, 0.4);
+  font-size: 10px;
+}
+
+.search-score {
+  color: #141011;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.player-pill {
+  display: flex;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}

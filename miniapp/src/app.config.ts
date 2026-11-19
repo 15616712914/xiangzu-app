@@ -1,0 +1,28 @@
+export default defineAppConfig({
+  pages: [
+    'pages/home/index',
+    'pages/table/index',
+    'pages/fans/index',
+    'pages/discover/index',
+    'pages/me/index',
+    'pages/match/index',
+    'pages/team/index',
+    'pages/player/index',
+    'pages/news/index',
+    'pages/search/index',
+    'pages/login/index',
+    'pages/chat/index',
+    'pages/notifications/index',
+    'pages/privacy/index',
+    'pages/bracket/index',
+    'pages/poster/index',
+  ],
+  window: {
+    backgroundTextStyle: 'dark',
+    backgroundColor: '#f3eee6',
+    navigationStyle: 'custom',
+    navigationBarTitleText: '湘超',
+    navigationBarTextStyle: 'black',
+  },
+  lazyCodeLoading: 'requiredComponents',
+})

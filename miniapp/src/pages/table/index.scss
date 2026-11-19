@@ -1,0 +1,410 @@
+.table-sheet {
+  padding-bottom: 16px;
+}
+
+.standings {
+  margin: 16px 20px 0;
+  overflow: hidden;
+}
+
+.standings-head,
+.standings-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 12px;
+}
+
+.standings-head {
+  border-bottom: 1px solid rgba(20, 16, 17, 0.05);
+  color: rgba(20, 16, 17, 0.4);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.standings-row {
+  border-bottom: 1px solid rgba(20, 16, 17, 0.05);
+}
+
+.standings-row:last-child {
+  border-bottom: none;
+}
+
+.standings-row.fav {
+  background: rgba(215, 38, 30, 0.06);
+}
+
+.col-rank {
+  width: 26px;
+  flex-shrink: 0;
+}
+
+.col-team {
+  flex: 1;
+}
+
+.col-num {
+  width: 26px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.col-gd {
+  width: 38px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.col-pts {
+  width: 36px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.rank-num {
+  width: 26px;
+  flex-shrink: 0;
+  color: rgba(20, 16, 17, 0.4);
+  font-size: 16px;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.rank-num.top {
+  color: #d7261e;
+}
+
+.team-cell {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.team-cell-main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.team-cell-name {
+  overflow: hidden;
+  color: #141011;
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.form-dots {
+  display: flex;
+  gap: 2px;
+}
+
+.form-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.col-num.value,
+.col-gd.value {
+  color: rgba(20, 16, 17, 0.7);
+  font-size: 12px;
+}
+
+.col-pts.pts {
+  color: #141011;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.scorers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px 0;
+}
+
+.scorer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+}
+
+.scorer.first {
+  background: #141011;
+  color: #fff;
+}
+
+.scorer-rank {
+  width: 22px;
+  color: rgba(20, 16, 17, 0.35);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.scorer-rank.top {
+  color: #d7261e;
+}
+
+.scorer-main {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.scorer-name {
+  overflow: hidden;
+  color: #141011;
+  font-size: 15px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scorer.first .scorer-name {
+  color: #fff;
+}
+
+.scorer-meta {
+  overflow: hidden;
+  color: rgba(20, 16, 17, 0.45);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scorer.first .scorer-meta {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.scorer-goals {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.scorer-num {
+  color: #141011;
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.scorer.first .scorer-num {
+  color: #fff;
+}
+
+.scorer-label {
+  margin-top: 2px;
+  color: rgba(20, 16, 17, 0.35);
+  font-size: 10px;
+}
+
+.scorer.first .scorer-label {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.team-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px 20px 0;
+}
+
+.team-tile {
+  display: flex;
+  width: calc(50% - 5px);
+  padding: 14px;
+  flex-direction: column;
+}
+
+.team-tile-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.team-tile-rank {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.team-tile-pos {
+  color: #d7261e;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.team-tile-pts {
+  color: rgba(20, 16, 17, 0.4);
+  font-size: 10px;
+}
+
+.team-tile-name {
+  margin-top: 10px;
+  color: #141011;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.team-tile-alias {
+  margin-top: 3px;
+  overflow: hidden;
+  color: rgba(20, 16, 17, 0.45);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.team-tile-bar {
+  height: 4px;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(20, 16, 17, 0.06);
+}
+
+.team-tile-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.projection {
+  padding: 16px 20px 0;
+}
+
+.projection-hero {
+  padding: 20px;
+  border-radius: 22px;
+  background: #141011;
+  background-image: radial-gradient(circle at 90% 10%, rgba(215, 38, 30, 0.4), transparent 55%);
+  color: #fff;
+}
+
+.projection-title {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.projection-sub {
+  display: block;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 11px;
+}
+
+.projection-leader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.projection-leader-label {
+  display: block;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 11px;
+}
+
+.projection-leader-name {
+  display: block;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.projection-pct {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.projection-pct-num {
+  color: #fff;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.projection-pct-label {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 10px;
+}
+
+.projection-list {
+  margin-top: 12px;
+  padding: 6px 16px;
+}
+
+.projection-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(20, 16, 17, 0.05);
+}
+
+.projection-row:last-child {
+  border-bottom: none;
+}
+
+.projection-rank {
+  width: 18px;
+  color: rgba(20, 16, 17, 0.35);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.projection-name {
+  width: 46px;
+  color: #141011;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.projection-track {
+  flex: 1;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(20, 16, 17, 0.06);
+}
+
+.projection-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.projection-value {
+  width: 34px;
+  color: #141011;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.disclaimer {
+  display: block;
+  padding: 14px 4px 4px;
+  color: rgba(20, 16, 17, 0.35);
+  font-size: 10px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.data-source {
+  display: block;
+  padding: 18px 20px 0;
+  color: rgba(20, 16, 17, 0.35);
+  font-size: 10px;
+  text-align: center;
+}

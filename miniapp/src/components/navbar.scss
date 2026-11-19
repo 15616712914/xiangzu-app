@@ -1,0 +1,63 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 40;
+  max-width: 440px;
+  margin: 0 auto;
+  transition: background-color 0.18s ease;
+}
+
+.navbar.stuck.light {
+  background: #f3eee6;
+  box-shadow: 0 1px 0 rgba(20, 16, 17, 0.06);
+}
+
+.navbar.stuck.dark {
+  background: #141011;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.navbar-row {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  /* Keep the share button clear of WeChat's capsule menu. */
+  padding: 0 100px 0 12px;
+}
+
+.navbar-back,
+.navbar-share {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(20, 16, 17, 0.05);
+}
+
+.navbar.dark .navbar-back,
+.navbar.dark .navbar-share {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.navbar-title {
+  flex: 1;
+  overflow: hidden;
+  color: #141011;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navbar.dark .navbar-title {
+  color: #fff;
+}
+
+.navbar-share::after {
+  border: none;
+}

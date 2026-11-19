@@ -1,0 +1,195 @@
+$chili: #d7261e;
+$ink: #141011;
+$paper: #f3eee6;
+$gold: #e3a83b;
+
+/* H5 custom elements default to inline; mini program ignores these selectors. */
+taro-view-core,
+taro-scroll-view-core {
+  display: block;
+}
+
+taro-text-core {
+  display: inline;
+}
+
+page {
+  background: #e9e2d4;
+  color: $ink;
+  font-family: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+view,
+text,
+button,
+input,
+textarea,
+image,
+scroll-view {
+  box-sizing: border-box;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  text-align: inherit;
+}
+
+button::after {
+  border: none;
+}
+
+.app {
+  position: relative;
+  min-height: 100vh;
+  max-width: 440px;
+  margin: 0 auto;
+  padding-bottom: 104px;
+  background: $paper;
+}
+
+@media (max-width: 500px) {
+  .app {
+    max-width: 100%;
+  }
+}
+
+.right {
+  text-align: right;
+}
+
+.sheet {
+  position: relative;
+  margin-top: -24px;
+  border-radius: 24px 24px 0 0;
+  background: $paper;
+  padding-top: 24px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.between {
+  justify-content: space-between;
+}
+
+.center {
+  justify-content: center;
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+
+.card {
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(20, 16, 17, 0.04), 0 12px 28px -16px rgba(20, 16, 17, 0.22);
+}
+
+.section {
+  padding: 0 20px;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px 10px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.section-action {
+  font-size: 11px;
+  color: rgba(20, 16, 17, 0.4);
+}
+
+.kicker {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.muted {
+  color: rgba(20, 16, 17, 0.45);
+}
+
+.chili {
+  color: $chili;
+}
+
+.gold {
+  color: $gold;
+}
+
+.hairline {
+  height: 1px;
+  background: rgba(20, 16, 17, 0.06);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: $ink;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.btn-chili {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: $chili;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.text-ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

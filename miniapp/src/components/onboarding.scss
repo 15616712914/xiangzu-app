@@ -1,0 +1,139 @@
+.onboarding {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: #17120f;
+  color: #fff;
+}
+
+.onboarding-hero {
+  position: relative;
+  flex-shrink: 0;
+  padding: 90px 24px 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 80% 0%, rgba(215, 38, 30, 0.5), transparent 58%),
+    linear-gradient(180deg, rgba(215, 38, 30, 0.18), #17120f);
+}
+
+.onboarding-watermark {
+  position: absolute;
+  top: -16px;
+  right: -10px;
+  color: rgba(255, 255, 255, 0.05);
+  font-size: 200px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.onboarding-brand {
+  display: flex;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: #d7261e;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 900;
+  box-shadow: 0 8px 24px -6px rgba(215, 38, 30, 0.9);
+}
+
+.onboarding-title {
+  display: block;
+  margin-top: 16px;
+  color: #fff;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.onboarding-sub {
+  display: block;
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.onboarding-grid {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px;
+  padding: 16px 24px 8px;
+}
+
+.onboarding-team {
+  position: relative;
+  display: flex;
+  width: calc((100% - 18px) / 4);
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 0 9px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.onboarding-team.on {
+  background: #fff;
+  color: #141011;
+}
+
+.onboarding-city {
+  color: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.onboarding-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #d7261e;
+}
+
+.onboarding-foot {
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+  padding: 14px 24px calc(env(safe-area-inset-bottom) + 18px);
+  background: linear-gradient(transparent, #17120f 22%);
+}
+
+.onboarding-cta {
+  padding: 14px 0;
+  border-radius: 999px;
+  background: #d7261e;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.onboarding-cta.off {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.onboarding-skip {
+  display: block;
+  margin-top: 8px;
+  padding: 8px 0;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 13px;
+  text-align: center;
+}

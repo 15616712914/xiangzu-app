@@ -1,0 +1,216 @@
+.player-page {
+  padding-bottom: 32px;
+}
+
+.player-hero {
+  position: relative;
+  padding-right: 20px;
+  padding-bottom: 26px;
+  padding-left: 20px;
+  color: #fff;
+}
+
+.player-portrait {
+  position: relative;
+  display: flex;
+  width: 96px;
+  height: 112px;
+  margin: 6px auto 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px 18px 26px 26px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.player-number {
+  color: #fff;
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.player-jersey {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+
+.player-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.player-name {
+  display: block;
+  color: #fff;
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.player-meta {
+  display: block;
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+}
+
+.player-job {
+  display: block;
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 10px;
+}
+
+.player-sheet {
+  padding-bottom: 24px;
+}
+
+.player-facts {
+  display: flex;
+  margin: 0 20px;
+  padding: 12px 0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(20, 16, 17, 0.04), 0 12px 28px -16px rgba(20, 16, 17, 0.22);
+}
+
+.player-fact {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.player-fact-value {
+  color: #141011;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.player-fact-label {
+  color: rgba(20, 16, 17, 0.4);
+  font-size: 10px;
+}
+
+.player-stats {
+  display: flex;
+  margin: 12px 20px 0;
+  padding: 12px 0;
+  border-radius: 16px;
+  background: #141011;
+}
+
+.player-stat {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.player-stat-value {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.player-stat-value.chili {
+  color: #e3a83b;
+}
+
+.player-stat-label {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 9px;
+}
+
+.player-section {
+  padding: 20px 20px 0;
+}
+
+.player-section-title {
+  display: block;
+  margin-bottom: 8px;
+  color: #141011;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.player-empty {
+  display: block;
+  padding: 16px;
+  border-radius: 16px;
+  background: #fff;
+  color: rgba(20, 16, 17, 0.4);
+  font-size: 11px;
+}
+
+.goal-list {
+  overflow: hidden;
+  padding: 0 14px;
+}
+
+.goal-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(20, 16, 17, 0.05);
+}
+
+.goal-row:last-child {
+  border-bottom: none;
+}
+
+.goal-minute {
+  width: 30px;
+  color: #d7261e;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.goal-match {
+  display: block;
+  color: #141011;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.goal-note {
+  display: block;
+  margin-top: 2px;
+  color: rgba(20, 16, 17, 0.4);
+  font-size: 10px;
+}
+
+.player-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 20px 0;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(20, 16, 17, 0.04), 0 12px 28px -16px rgba(20, 16, 17, 0.22);
+}
+
+.player-team-name {
+  display: block;
+  color: #141011;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.player-team-sub {
+  display: block;
+  margin-top: 2px;
+  color: rgba(20, 16, 17, 0.4);
+  font-size: 10px;
+}

@@ -1,0 +1,116 @@
+.chat-page {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  background: #f3eee6;
+}
+
+.chat-scroll {
+  flex: 1;
+  height: calc(100vh - 180px);
+}
+
+.chat-inner {
+  padding: 104px 16px 20px;
+}
+
+.chat-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.chat-msg.user {
+  justify-content: flex-end;
+}
+
+.chat-avatar {
+  display: flex;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #141011;
+}
+
+.chat-bubble {
+  max-width: 78%;
+  padding: 10px 13px;
+  border-radius: 4px 16px 16px 16px;
+  background: #fff;
+  color: rgba(20, 16, 17, 0.8);
+  font-size: 13px;
+  line-height: 1.65;
+  box-shadow: 0 1px 2px rgba(20, 16, 17, 0.04);
+}
+
+.chat-msg.user .chat-bubble {
+  border-radius: 16px 4px 16px 16px;
+  background: #141011;
+  color: #fff;
+}
+
+.chat-bubble.thinking {
+  color: rgba(20, 16, 17, 0.4);
+}
+
+.chat-end {
+  height: 1px;
+}
+
+.chat-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 16px;
+}
+
+.chat-suggestion {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border: 1px solid rgba(215, 38, 30, 0.2);
+  border-radius: 999px;
+  background: #fff;
+  color: #d7261e;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.chat-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 16px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(20, 16, 17, 0.04), 0 12px 28px -16px rgba(20, 16, 17, 0.22);
+}
+
+.chat-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.chat-send {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #d7261e;
+}
+
+.chat-note {
+  display: block;
+  padding: 10px 0 calc(env(safe-area-inset-bottom) + 12px);
+  color: rgba(20, 16, 17, 0.3);
+  font-size: 10px;
+  text-align: center;
+}

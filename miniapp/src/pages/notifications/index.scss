@@ -1,0 +1,82 @@
+.notice-page {
+  padding-bottom: 32px;
+}
+
+.notice-body {
+  padding: 92px 20px 0;
+}
+
+.notice-list {
+  overflow: hidden;
+  padding: 0 16px;
+}
+
+.notice-row {
+  display: flex;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(20, 16, 17, 0.05);
+}
+
+.notice-row:last-child {
+  border-bottom: none;
+}
+
+.notice-icon {
+  position: relative;
+  display: flex;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f3eee6;
+}
+
+.notice-icon.goal {
+  background: #d7261e;
+}
+
+.notice-dot {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #d7261e;
+}
+
+.notice-title {
+  color: rgba(20, 16, 17, 0.7);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.notice-title.unread {
+  color: #141011;
+  font-weight: 900;
+}
+
+.notice-time {
+  color: rgba(20, 16, 17, 0.35);
+  font-size: 10px;
+}
+
+.notice-body-text {
+  display: block;
+  margin-top: 3px;
+  color: rgba(20, 16, 17, 0.55);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.notice-note {
+  display: block;
+  margin-top: 16px;
+  color: rgba(20, 16, 17, 0.3);
+  font-size: 10px;
+  text-align: center;
+}

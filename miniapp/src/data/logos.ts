@@ -1,0 +1,15 @@
+import cs from '../assets/teams/cs.png'
+import yz from '../assets/teams/yz.png'
+import ld from '../assets/teams/ld.png'
+import cz from '../assets/teams/cz.png'
+import cd from '../assets/teams/cd.png'
+import zz from '../assets/teams/zz.png'
+import yy from '../assets/teams/yy.png'
+import yiy from '../assets/teams/yiy.png'
+import xt from '../assets/teams/xt.png'
+import hh from '../assets/teams/hh.png'
+import zjj from '../assets/teams/zjj.png'
+import hy from '../assets/teams/hy.png'
+import sy from '../assets/teams/sy.png'
+
+export const TEAM_LOGOS: Record<string, string> = { cs, yz, ld, cz, cd, zz, yy, yiy, xt, hh, zjj, hy, sy }

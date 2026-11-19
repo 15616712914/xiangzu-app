@@ -1,0 +1,10 @@
+{
+  "description": "Explore 湘超, discover what the Hunan football competition is, and find useful information for fans and newcomers.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
