@@ -6,7 +6,6 @@ import { Icon } from '../../components/Icon'
 import { DarkSegments, PageHeader } from '../../components/ui'
 import { TabBar } from '../../components/TabBar'
 import {
-  CURRENT_ROUND,
   computeScorers,
   computeStandings,
 } from '../../data/league'
@@ -27,23 +26,27 @@ export default function Table() {
     () => (seg === 'ai' ? simulateSeason(3000, app.matches) : null),
     [seg, app.matches],
   )
+  // The projection only covers league rounds; hide the tab once they are all played.
+  const segOptions: (readonly [Seg, string])[] = [
+    ['table', '积分榜'],
+    ['scorers', '射手榜'],
+    ['teams', '球队'],
+  ]
+  if (app.matches.some((m) => m.phase === 'league' && m.status !== 'finished')) {
+    segOptions.push(['ai', '模型推演'])
+  }
 
   return (
     <View className='app'>
       <PageHeader
         kicker='Standings & Stats'
         title='数据'
-        subtitle={`截至第 ${CURRENT_ROUND} 轮已完赛场次`}
+        subtitle='2026 赛季 · 常规赛与淘汰赛'
       >
         <DarkSegments<Seg>
           value={seg}
           onChange={setSeg}
-          options={[
-            ['table', '积分榜'],
-            ['scorers', '射手榜'],
-            ['teams', '球队'],
-            ['ai', 'AI推演'],
-          ]}
+          options={segOptions}
         />
       </PageHeader>
 
@@ -158,7 +161,7 @@ export default function Table() {
         )}
 
         {seg === 'ai' && projection && projection.remaining === 0 && (
-          <Text className='panel-empty'>常规赛已结束，AI 推演将在淘汰赛阶段更新。</Text>
+          <Text className='panel-empty'>常规赛已结束，赛季推演已停止更新。</Text>
         )}
 
         {seg === 'ai' && projection && projection.remaining > 0 && (
@@ -166,7 +169,7 @@ export default function Table() {
             <View className='projection-hero'>
               <View className='row gap-2'>
                 <Icon name='sparkles' size={15} color='#e3a83b' />
-                <Text className='projection-title'>AI 赛季推演</Text>
+                <Text className='projection-title'>赛季模型推演</Text>
               </View>
               <Text className='projection-sub'>
                 剩余 {projection.remaining} 场模拟 {projection.runs.toLocaleString()} 次
@@ -214,7 +217,7 @@ export default function Table() {
         )}
 
         <Text className='data-source'>
-          数据来源：足球中国 / 湖南省足球联赛 · 更新至 2026-11-15
+          数据来源：足球中国 / 湖南省足球联赛 · 一切以官方发布为准
         </Text>
       </View>
 

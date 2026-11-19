@@ -5,39 +5,39 @@ import './index.scss'
 export default function Privacy() {
   return (
     <View className='app privacy-page'>
-      <NavBar title='隐私与用户协议' />
+      <NavBar title='隐私与数据来源' />
       <View className='privacy-body'>
-        <Text className='privacy-title'>湘超隐私政策与用户协议</Text>
+        <Text className='privacy-title'>湘超小程序隐私说明</Text>
         <Text className='privacy-updated'>更新日期：2026年11月</Text>
 
         <Text className='privacy-h'>一、我们收集什么</Text>
         <Text className='privacy-p'>
-          当前原型不会收集你的真实个人信息。演示登录仅在本地保存昵称和手机号，用于展示登录后的界面状态，不会上传到服务器。
+          本小程序无需登录，不收集昵称、手机号、头像、位置或设备通讯录。你选择的主队、加入提醒的比赛和已读状态只保存在本机微信缓存中，不会上传。
         </Text>
 
         <Text className='privacy-h'>二、我们如何使用</Text>
         <Text className='privacy-p'>
-          主队、竞猜、助威、提醒等数据保存在你的设备本地，用于恢复你的使用状态。正式版接入后端后，我们会在收集前明确告知用途并征得同意。
+          本机保存的设置仅用于恢复你的浏览状态：首页置顶主队下一场比赛、消息中心显示真实赛程提醒。清除微信缓存或删除小程序即可全部删除。
         </Text>
 
         <Text className='privacy-h'>三、第三方服务</Text>
         <Text className='privacy-p'>
-          正式版可能使用微信登录、订阅消息、地图与支付能力。相关服务由微信提供，遵循微信的隐私政策。
+          赛程数据通过微信云开发读取，不涉及你的个人信息。小程序未接入微信登录、支付、广告、地图或第三方统计。
         </Text>
 
-        <Text className='privacy-h'>四、内容与社区</Text>
+        <Text className='privacy-h'>四、赛事数据与免责声明</Text>
         <Text className='privacy-p'>
-          评论等功能上线前会接入内容安全审核。请勿发布违法违规、侮辱谩骂、赌博或侵权内容。
+          赛程、比分、积分、射手榜与名单来自湘超官方公开渠道，更新可能有延迟，一切以赛事官方发布为准。AI 推演由本地模型计算，仅供娱乐，不构成任何投注建议。本小程序与赛事主办方无隶属关系。
         </Text>
 
         <Text className='privacy-h'>五、你的权利</Text>
         <Text className='privacy-p'>
-          你可以随时在「我的」中退出登录，或清除小程序缓存以删除本地数据。正式版将提供账号注销与数据删除入口。
+          由于不建立账号、不保存服务器端个人数据，你可以随时清除本机缓存删除全部本地设置。
         </Text>
 
         <Text className='privacy-h'>六、联系我们</Text>
         <Text className='privacy-p'>
-          如对隐私或协议有疑问，可通过赛事官方渠道联系我们。本文为原型演示文本，正式上线前需由法务审核。
+          如对数据来源或隐私有疑问，可通过小程序「我的 - 关于」中的联系方式反馈；涉及官方数据的更正，请以赛事官方渠道为准。
         </Text>
       </View>
     </View>

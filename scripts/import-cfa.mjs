@@ -208,4 +208,9 @@ const payload = {
   squads,
 }
 writeFileSync(resolve(MINI, 'src/data/season.json'), JSON.stringify(payload, null, 2))
+mkdirSync(resolve(MINI, 'cloudfunctions/league'), { recursive: true })
+writeFileSync(
+  resolve(MINI, 'cloudfunctions/league/season.json'),
+  JSON.stringify({ updatedAt: payload.updatedAt, matches: payload.matches }),
+)
 console.log(`wrote ${payload.matches.length} matches, ${Object.values(squads).reduce((n, s) => n + s.length, 0)} players, ${logos.length} logos`)

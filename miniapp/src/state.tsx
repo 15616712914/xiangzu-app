@@ -147,7 +147,7 @@ export function AppProvider({ children }: { children?: React.ReactNode }) {
 
   // Remote data replaces the seed only when it actually arrives; offline keeps the demo usable.
   const refresh = useCallback(async () => {
-    if (fetching.current || !process.env.TARO_APP_API) return
+    if (fetching.current) return
     fetching.current = true
     try {
       const remote = await fetchLeague()

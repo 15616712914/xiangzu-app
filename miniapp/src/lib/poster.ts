@@ -1,7 +1,6 @@
 import Taro from '@tarojs/taro'
 import { formatDate, score, stageLabel, type Match } from '../data/league'
 import { predictMatch } from '../data/predict'
-import { createRng, hashString } from '../data/random'
 import { TEAM_MAP, type Team } from '../data/teams'
 
 const W = 720
@@ -82,30 +81,6 @@ function shield(ctx: Ctx, team: Team, cx: number, cy: number, size: number) {
   ctx.restore()
 }
 
-function fakeQr(ctx: Ctx, seed: string, x: number, y: number, size: number) {
-  const n = 21
-  const cell = size / n
-  const rng = createRng(hashString(seed))
-  ctx.fillStyle = '#fff'
-  ctx.fillRect(x - 8, y - 8, size + 16, size + 16)
-  ctx.fillStyle = '#17120f'
-  const finder = (fx: number, fy: number) => {
-    ctx.fillRect(x + fx * cell, y + fy * cell, cell * 7, cell * 7)
-    ctx.fillStyle = '#fff'
-    ctx.fillRect(x + (fx + 1) * cell, y + (fy + 1) * cell, cell * 5, cell * 5)
-    ctx.fillStyle = '#17120f'
-    ctx.fillRect(x + (fx + 2) * cell, y + (fy + 2) * cell, cell * 3, cell * 3)
-  }
-  for (let i = 0; i < n; i++)
-    for (let j = 0; j < n; j++) {
-      const inFinder = (i < 8 && j < 8) || (i > n - 9 && j < 8) || (i < 8 && j > n - 9)
-      if (!inFinder && rng.next() < 0.48) ctx.fillRect(x + i * cell, y + j * cell, cell, cell)
-    }
-  finder(0, 0)
-  finder(n - 7, 0)
-  finder(0, n - 7)
-}
-
 /** Draws the poster into a mini program Canvas 2D node and returns a temp PNG path. */
 export async function renderPoster(match: Match, liveMinute: number, canvas: any, matches: Match[] = []) {
   canvas.width = W
@@ -180,7 +155,7 @@ export async function renderPoster(match: Match, liveMinute: number, canvas: any
   ctx.textAlign = 'left'
   ctx.fillStyle = '#fcd34d'
   ctx.font = `700 24px ${SANS}`
-  ctx.fillText(match.status === 'finished' ? 'AI 赛前预测' : 'AI 预测', 92, boxY + 52)
+  ctx.fillText(match.status === 'finished' ? '模型推演 · 赛前' : '模型推演', 92, boxY + 52)
   ctx.textAlign = 'right'
   ctx.fillStyle = '#fff'
   ctx.font = `700 64px ${DISPLAY}`
@@ -213,14 +188,11 @@ export async function renderPoster(match: Match, liveMinute: number, canvas: any
   ctx.font = `500 24px ${SANS}`
   ctx.fillText(`${formatDate(match.date)} ${match.time} · ${home.stadium}`, W / 2, 910)
 
-  fakeQr(ctx, match.id, 72, 990, 120)
-  ctx.textAlign = 'left'
-  ctx.fillStyle = '#fff'
-  ctx.font = `900 30px ${SANS}`
-  ctx.fillText('长按识别，一起看湘超', 236, 1040)
-  ctx.fillStyle = 'rgba(255,255,255,0.5)'
-  ctx.font = `500 20px ${SANS}`
-  ctx.fillText('原型示意二维码 · 预测仅供娱乐参考', 236, 1080)
+  ctx.textAlign = 'center'
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'
+  ctx.font = `500 22px ${SANS}`
+  ctx.fillText('模型推演仅供娱乐，不构成投注建议', W / 2, 1040)
+  ctx.fillText('赛事数据以官方发布为准', W / 2, 1078)
 
   const res = await Taro.canvasToTempFilePath({
     canvas,

@@ -100,7 +100,7 @@ export default function TeamDetail() {
             className={`team-tab ${tab === 'wall' ? 'on' : ''}`}
             onClick={() => setTab('wall')}
           >
-            照片墙
+            球员墙
           </Text>
           <Text
             className={`team-tab ${tab === 'squad' ? 'on' : ''}`}

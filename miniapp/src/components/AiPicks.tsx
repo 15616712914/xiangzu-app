@@ -23,14 +23,14 @@ export function AiPicks() {
   return (
     <View className='ai-picks'>
       <SectionTitle
-        kicker='AI Picks'
+        kicker='Model'
         action={
           <Text className='section-action'>
             本季命中 {record.hits}/{record.total}
           </Text>
         }
       >
-        <Text>AI 预测</Text>
+        <Text>模型推演</Text>
         <Icon name='sparkles' size={15} color='#d7261e' />
       </SectionTitle>
 
@@ -84,6 +84,7 @@ export function AiPicks() {
         })}
         </View>
       </ScrollView>
+      <Text className='ai-note'>模型推演，仅供娱乐，不构成投注建议</Text>
     </View>
   )
 }

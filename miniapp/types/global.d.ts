@@ -13,5 +13,7 @@ declare namespace NodeJS {
     NODE_ENV: 'development' | 'production'
     TARO_ENV: 'weapp' | 'h5'
     TARO_APP_ID: string
+    TARO_APP_API: string
+    TARO_APP_CLOUD_ENV: string
   }
 }

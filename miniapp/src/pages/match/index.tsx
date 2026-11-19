@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import Taro, { usePullDownRefresh, useRouter, useShareAppMessage } from '@tarojs/taro'
 import { View, Text, Input } from '@tarojs/components'
 import { useApp } from '../../state'
+import { MVP } from '../../config'
 import { Crest } from '../../components/Crest'
 import { Icon } from '../../components/Icon'
 import { LiveBadge } from '../../components/ui'
@@ -15,7 +16,7 @@ import {
   visibleEvents,
   type Match,
 } from '../../data/league'
-import { TEAM_MAP, type Player } from '../../data/teams'
+import { TEAM_MAP } from '../../data/teams'
 import { createRng, hashString } from '../../data/random'
 import { predictMatch, actualOutcome } from '../../data/predict'
 import { buildIcs } from '../../lib/calendar'
@@ -33,7 +34,7 @@ export default function MatchDetail() {
     void app.refresh().finally(() => Taro.stopPullDownRefresh())
   })
   const initialTab = router.params.tab === 'ai' ? 'ai' : undefined
-  const [tab, setTab] = useState<Tab>(initialTab ?? (match?.status === 'upcoming' ? 'ai' : 'events'))
+  const [tab, setTab] = useState<Tab>(initialTab ?? 'ai')
 
   useShareAppMessage(() => {
     if (!match) return { title: '湘超', path: '/pages/home/index' }
@@ -162,19 +163,23 @@ export default function MatchDetail() {
 
       <View className='sheet match-sheet'>
         <MatchInfo match={match} />
-        <GuessCard match={match} />
-        <VoteCard match={match} />
+        {!MVP && <GuessCard match={match} />}
+        {!MVP && <VoteCard match={match} />}
 
         <View className='match-tabs'>
-          {(
-            [
-              ['events', '赛况'],
-              ['live', '直播'],
-              ['ai', 'AI预测'],
-              ['stats', '数据'],
-              ['lineup', '名单'],
-              ['talk', '讨论'],
-            ] as [Tab, string][]
+          {(MVP
+            ? ([
+                ['ai', '模型推演'],
+                ['lineup', '名单'],
+              ] as [Tab, string][])
+            : ([
+                ['events', '赛况'],
+                ['live', '直播'],
+                ['ai', 'AI预测'],
+                ['stats', '数据'],
+                ['lineup', '名单'],
+                ['talk', '讨论'],
+              ] as [Tab, string][])
           ).map(([key, label]) => (
             <Text
               key={key}
@@ -219,6 +224,9 @@ function MatchInfo({ match }: { match: Match }) {
         <Text className='info-label'>场地</Text>
         <Text className='info-value'>{match.venue || home.stadium}</Text>
       </View>
+      {match.status !== 'upcoming' && (
+        <Text className='info-note'>官方未公布逐场进球事件与技术统计。</Text>
+      )}
     </View>
   )
 }
@@ -367,7 +375,7 @@ function Events({ match }: { match: Match }) {
   const app = useApp()
   const events = visibleEvents(match, app.liveMinute)
   if (match.status === 'upcoming') {
-    return <Text className='panel-empty'>比赛尚未开始，先去 AI 预测看看双方胜率。</Text>
+    return <Text className='panel-empty'>比赛尚未开始，可在「模型推演」查看胜率参考。</Text>
   }
   if (events.length === 0) {
     return (
@@ -439,7 +447,7 @@ function AiPanel({ match }: { match: Match }) {
           <View className='row gap-2'>
             <Icon name='sparkles' size={15} color='#e3a83b' />
             <Text className='ai-title'>
-              {match.status === 'live' ? 'AI 实时预测' : 'AI 赛前预测'}
+              {match.status === 'live' ? '实时模型推演' : '模型推演'}
             </Text>
           </View>
           <Text className='ai-confidence'>置信度 · {p.confidence}</Text>

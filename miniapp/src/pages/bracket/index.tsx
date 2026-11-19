@@ -58,6 +58,7 @@ function stageTies(matches: Match[], firstRound: number, secondRound: number): T
 function TieCard({ tie }: { tie: Tie }) {
   const first = tie.legs[0]
   const second = tie.legs[1]
+  const played = tie.legs.some((m) => m.status === 'finished')
   return (
     <View className='card bracket-tie'>
       {[tie.home, tie.away].map((id) => {
@@ -71,7 +72,7 @@ function TieCard({ tie }: { tie: Tie }) {
             <Crest team={team} size={20} />
             <Text className='grow'>{team.city}</Text>
             <Text className={`bracket-pct ${won ? 'win' : ''}`}>
-              {goals}
+              {played ? goals : '–'}
               {pen != null ? ` (${pen})` : ''}
             </Text>
           </View>

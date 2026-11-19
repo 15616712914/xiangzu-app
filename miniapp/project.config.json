@@ -1,5 +1,6 @@
 {
   "miniprogramRoot": "dist/",
+  "cloudfunctionRoot": "cloudfunctions/",
   "projectname": "xiangchao-miniapp",
   "description": "湘超微信小程序版",
   "appid": "wx92488c445753f70a",

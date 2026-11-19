@@ -42,7 +42,7 @@ export default function Notifications() {
             )
           })}
         </View>
-        <Text className='notice-note'>本地提醒由真实赛程生成；正式版将通过微信订阅消息送达。</Text>
+        <Text className='notice-note'>提醒由本机生成，不会发送推送；可在比赛详情加入或取消。</Text>
       </View>
     </View>
   )

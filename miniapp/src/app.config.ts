@@ -2,7 +2,6 @@ export default defineAppConfig({
   pages: [
     'pages/home/index',
     'pages/table/index',
-    'pages/fans/index',
     'pages/discover/index',
     'pages/me/index',
     'pages/match/index',
@@ -10,8 +9,6 @@ export default defineAppConfig({
     'pages/player/index',
     'pages/news/index',
     'pages/search/index',
-    'pages/login/index',
-    'pages/chat/index',
     'pages/notifications/index',
     'pages/privacy/index',
     'pages/bracket/index',
