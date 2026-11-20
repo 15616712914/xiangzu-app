@@ -130,6 +130,7 @@
     <div class="bar">
       <input id="token" type="password" placeholder="管理令牌" autocomplete="off" />
       <input id="search" type="search" placeholder="搜索球队 / 轮次 / 日期" />
+      <button id="sync">同步官方</button>
       <button id="refresh">刷新</button>
       <button id="log-toggle">操作记录</button>
     </div>
@@ -142,6 +143,7 @@
     <div class="hint">
       令牌只保存在当前标签页（sessionStorage），关闭标签页即清除。上线请用环境变量
       <code>ADMIN_TOKEN</code> 设置强令牌，并把后台限制在内网或登录保护后。
+      「同步官方」会从足球中国公开赛程拉取完场比分；自动同步每 10 分钟运行一次。
     </div>
 
     <main>
@@ -334,6 +336,33 @@
           item.classList.toggle('active', item === button)
         })
         render()
+      })
+
+      $('sync').addEventListener('click', async () => {
+        if (!tokenInput.value) {
+          toast('请先填入管理令牌')
+          return
+        }
+        const button = $('sync')
+        button.disabled = true
+        try {
+          const res = await fetch('/api/admin/sync-official?force=1&players=1', {
+            method: 'POST',
+            headers: { 'x-admin-token': tokenInput.value },
+          })
+          const data = await res.json()
+          if (!res.ok) throw new Error(data.error || '同步失败')
+          if (data.skipped) {
+            toast(data.skipped)
+          } else {
+            toast(`已同步：${data.matchesUpdated} 场比分，${data.playersUpdated} 名球员`)
+            await load()
+          }
+        } catch (e) {
+          toast(e.message)
+        } finally {
+          button.disabled = false
+        }
       })
 
       $('refresh').addEventListener('click', () => {

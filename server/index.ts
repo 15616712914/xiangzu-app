@@ -24,6 +24,7 @@ import type { Player, Team } from '../miniapp/src/data/teams'
 import { createFansStore } from './fans'
 import { createFansRouter } from './fans-routes'
 import { createAIRouter } from './ai'
+import { syncOfficial, writeSyncLog } from './official-sync'
 
 export type StoreData = {
   updatedAt: string
@@ -273,6 +274,34 @@ export function createApp(
   app.get('/api/admin/log', (req, res) => {
     if (!requireAdmin(req, res)) return
     res.json({ entries: readAdminLog(adminLogFile, 50).reverse() })
+  })
+
+  let lastSyncAt = 0
+  app.post('/api/admin/sync-official', async (req, res) => {
+    if (!requireAdmin(req, res)) return
+    if (Date.now() - lastSyncAt < 30_000 && req.query.force !== '1') {
+      return res.status(429).json({ error: '同步太频繁，请 30 秒后再试' })
+    }
+    lastSyncAt = Date.now()
+    const draft = structuredClone(store)
+    try {
+      const result = await syncOfficial(draft, {
+        force: req.query.force === '1',
+        forcePlayers: req.query.players === '1',
+      })
+      if (result.matchesUpdated > 0 || result.playersUpdated > 0) {
+        backupFile(dataFile, 'data', 20)
+        store.matches = draft.matches
+        store.squads = draft.squads
+        saveStore(dataFile, store)
+      }
+      if (!result.skipped) {
+        writeSyncLog(resolve(dirname(dataFile), 'logs', 'sync.jsonl'), result)
+      }
+      res.json({ ok: true, ...result, updatedAt: store.updatedAt })
+    } catch (error) {
+      res.status(502).json({ error: error instanceof Error ? error.message : '官方同步失败' })
+    }
   })
 
   app.get('/admin', (_req, res) => {

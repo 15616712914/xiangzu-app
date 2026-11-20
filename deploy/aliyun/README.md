@@ -62,6 +62,39 @@ systemctl restart xiangzu-api
 
 以后把仓库改回私有后，需要给服务器配 Deploy Key，或者在 GitHub 生成只读 token。
 
+## 自动同步官方数据
+
+后台顶部有「同步官方」按钮；服务器另有 systemd timer 每 10 分钟自动跑一次。
+
+同步内容：
+
+- 已完场比分和状态
+- 开赛时间到点后标记进行中
+- 球员出场、进球、点球、黄牌、红牌
+
+不会自动处理：
+
+- 比赛进行中的实时比分（官方公开赛程没有稳定的实时比分接口）
+- 官方接口缺失的点球大战比分（例如 1/4 决赛娄底 7-6 衡阳需要人工保留）
+- 延期、改期、官方更正
+
+日志：
+
+```bash
+tail -50 /var/log/xiangzu-sync.log
+tail -20 /opt/xiangzu/data/logs/sync.jsonl
+systemctl status xiangzu-sync.timer
+```
+
+手动触发：
+
+```bash
+PORT=$(grep '^PORT=' /opt/xiangzu/api.env | cut -d= -f2-)
+TOKEN=$(grep '^ADMIN_TOKEN=' /opt/xiangzu/api.env | cut -d= -f2-)
+curl -X POST -H "x-admin-token: $TOKEN" \
+  "http://127.0.0.1:$PORT/api/admin/sync-official?force=1&players=1"
+```
+
 ## 注意
 
 - 不要停掉或改 nginx，现有网站还在用它。

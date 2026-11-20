@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createApp } from './index'
 import { createFansStore, isVoteLocked } from './fans'
+import { syncOfficial } from './official-sync'
 
 const dir = mkdtempSync(join(tmpdir(), 'xiangchao-server-'))
 const dataFile = join(dir, 'data.json')
@@ -375,5 +376,78 @@ test('fresh volume seeds data and serves the privacy page', async () => {
   } finally {
     server2.close()
     rmSync(seedDir, { recursive: true, force: true })
+  }
+})
+
+
+test('official sync updates finished scores, live status and player stats', async () => {
+  const originalFetch = globalThis.fetch
+  const baseMatch = {
+    round: 1,
+    phase: 'league',
+    stage: '第1轮',
+    leg: null,
+    venue: '',
+    penalty: null,
+    startMinute: null,
+    attendance: 0,
+    events: [],
+    stats: { possession: [50, 50], shots: [0, 0], onTarget: [0, 0], corners: [0, 0], fouls: [0, 0] },
+  }
+  const store = {
+    updatedAt: '',
+    matches: [
+      { ...baseMatch, id: 'm1', date: '2026-11-21', time: '19:38', home: 'cs', away: 'yz', status: 'upcoming', homeGoals: 0, awayGoals: 0 },
+      { ...baseMatch, id: 'm2', date: '2026-11-21', time: '20:00', home: 'ld', away: 'xt', status: 'upcoming', homeGoals: 0, awayGoals: 0 },
+    ],
+    squads: { cs: [], yz: [], ld: [], xt: [] },
+  } as any
+
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = String(input)
+    if (url.includes('/league/26854/')) {
+      return new Response('<input id="_token" value="test-token">')
+    }
+    if (url.includes('players_and_staff')) {
+      return new Response(JSON.stringify({
+        result: {
+          players: [{
+            user_id: 9,
+            nickname: '测试球员',
+            player_number: 9,
+            match_count: 1,
+            goal_count: 2,
+            penalty_goal_count: 1,
+            yellow_card_count: 0,
+            red_card_count: 0,
+          }],
+        },
+      }))
+    }
+    if (url.includes('round_id=202871')) {
+      return new Response(JSON.stringify({ result: [{ match_id: 1, result: '2:1', penalty_result: '' }] }))
+    }
+    if (url.includes('round_id=202873')) {
+      return new Response(JSON.stringify({ result: [{ match_id: 2, result: '', penalty_result: '' }] }))
+    }
+    return new Response(JSON.stringify({ result: [] }))
+  }) as typeof fetch
+
+  try {
+    const result = await syncOfficial(store, {
+      force: true,
+      now: new Date('2026-11-21T20:10:00+08:00'),
+    })
+    assert.equal(store.matches[0].status, 'finished')
+    assert.equal(store.matches[0].homeGoals, 2)
+    assert.equal(store.matches[0].awayGoals, 1)
+    assert.equal(store.matches[1].status, 'live')
+    assert.ok(result.matchesUpdated >= 2)
+    const player = store.squads.cs.find((p: any) => p.id === 'cs-9')
+    assert.equal(player.goals, 3)
+    assert.equal(player.penalties, 1)
+    assert.equal(player.appearances, 1)
+  } finally {
+    globalThis.fetch = originalFetch
   }
 })
