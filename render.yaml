@@ -2,7 +2,10 @@ services:
   - type: web
     name: xiangchao-api
     runtime: docker
-    plan: starter
+    # Free plan needs no card, but the filesystem is ephemeral:
+    # accounts/votes can reset when the service restarts or redeploys.
+    # Upgrade to starter + disk before real account testing.
+    plan: free
     dockerContext: .
     dockerfilePath: ./server/Dockerfile
     healthCheckPath: /api/health
@@ -16,7 +19,3 @@ services:
         sync: false
       - key: DEEPSEEK_MODEL
         value: deepseek-chat
-    disk:
-      name: data
-      mountPath: /var/data
-      sizeGB: 1
