@@ -378,7 +378,11 @@
       })
 
       function fillAiMatches() {
-        const finished = matches.filter((m) => m.status === 'finished').slice(0, 12)
+        const finished = matches
+          .filter((m) => m.status === 'finished')
+          .slice()
+          .sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time))
+          .slice(0, 12)
         $('ai-match').innerHTML = finished
           .map((m) => `<option value="${m.id}">${m.date} ${cityOf(m.home)} vs ${cityOf(m.away)} ${m.homeGoals}:${m.awayGoals}</option>`)
           .join('')
