@@ -207,7 +207,7 @@ struct DataView: View {
             columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)],
             spacing: 10
         ) {
-            ForEach(store.teams) { team in
+            ForEach(store.standings.compactMap { TeamInfo.map[$0.teamId] }) { team in
                 let rank = (store.standings.firstIndex { $0.teamId == team.id } ?? 0) + 1
                 let points = store.standings.first { $0.teamId == team.id }?.points ?? 0
 

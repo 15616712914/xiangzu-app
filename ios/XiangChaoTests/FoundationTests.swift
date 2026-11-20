@@ -107,7 +107,7 @@ final class FoundationTests: XCTestCase {
 
     func testDayChipLabel() {
         XCTAssertEqual(League.dayChipLabel(League.todayString), "今天")
-        XCTAssertEqual(League.dayChipLabel("2026-11-21"), "11/21")
+        XCTAssertEqual(League.dayChipLabel("2027-03-05"), "3/5")
         XCTAssertEqual(League.dayChipLabel("bad"), "bad")
     }
 

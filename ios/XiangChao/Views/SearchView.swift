@@ -31,7 +31,13 @@ struct SearchView: View {
         let ids = Set(teams.map(\.id))
         return store.matches
             .filter { ids.contains($0.home) || ids.contains($0.away) }
-            .sorted { $0.date == $1.date ? $0.time > $1.time : $0.date > $1.date }
+            .sorted { lhs, rhs in
+                if lhs.isUpcoming != rhs.isUpcoming { return lhs.isUpcoming }
+                if lhs.isUpcoming {
+                    return lhs.date == rhs.date ? lhs.time < rhs.time : lhs.date < rhs.date
+                }
+                return lhs.date == rhs.date ? lhs.time > rhs.time : lhs.date > rhs.date
+            }
             .prefix(13)
             .map { $0 }
     }
