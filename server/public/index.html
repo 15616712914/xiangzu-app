@@ -72,6 +72,27 @@
       .status { width: 104px; }
       .muted { color: var(--muted); font-size: 11px; }
       .live { color: var(--chili); font-weight: 700; }
+      #rows input, #rows select {
+        border: 1px solid rgba(20, 16, 17, 0.14);
+        border-radius: 6px;
+        padding: 6px 8px;
+        background: #fff;
+        color: var(--ink);
+        font: inherit;
+        font-size: 13px;
+      }
+      #rows .save {
+        border: none;
+        background: var(--ink);
+        color: #fff;
+        font-weight: 700;
+        font-size: 12px;
+        padding: 7px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      #rows .save:hover { background: var(--chili); }
+      #rows .save:disabled { opacity: 0.45; cursor: default; }
       .toast {
         position: fixed;
         right: 20px;
@@ -135,7 +156,7 @@
             <th>分钟</th>
             <th>现场人数</th>
             <th>状态</th>
-            <th></th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
