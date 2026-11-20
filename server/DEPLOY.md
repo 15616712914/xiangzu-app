@@ -1,5 +1,7 @@
 # 后端部署（Render）
 
+> 当前实际部署在阿里云 + Cloudflare 隧道，见 [`../deploy/aliyun/README.md`](../deploy/aliyun/README.md)。本文保留 Render 方案，作为以后换托管时的参考。
+
 目标：得到一个公网 HTTPS API，让真机上的赛程、登录、投票、AI 和隐私政策 URL 都能用。
 
 ## 0. 前置
