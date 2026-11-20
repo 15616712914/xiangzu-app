@@ -12,9 +12,13 @@ PORT=$(grep '^PORT=' "$ENV_FILE" | cut -d= -f2-)
 
 echo "==> 拉取最新代码"
 cd "$APP_DIR"
-git fetch origin mvp
-git checkout mvp
-git pull --ff-only origin mvp
+if [[ "${SKIP_PULL:-0}" != "1" ]]; then
+  git fetch origin mvp
+  git checkout mvp
+  git pull --ff-only origin mvp
+else
+  echo "SKIP_PULL=1，跳过 git，使用已解压的代码"
+fi
 
 echo "==> 安装依赖并重启 API"
 cd "$APP_DIR/server"
