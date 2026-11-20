@@ -3,13 +3,13 @@
 ## 当前后端
 
 ```text
-https://removed-parallel-joke-complications.trycloudflare.com
+https://reservoir-expired-concord-handed.trycloudflare.com
 ```
 
 归档时必须带上这个地址：
 
 ```bash
-XC_API_BASE_URL=https://removed-parallel-joke-complications.trycloudflare.com
+XC_API_BASE_URL=https://reservoir-expired-concord-handed.trycloudflare.com
 ```
 
 快速隧道重启后地址会变；先用 `deploy/aliyun/README.md` 里的命令取新地址，再重新打包。
@@ -65,7 +65,7 @@ Xcode 打开 `ios/XiangChao.xcodeproj`：
 ```bash
 cd ios
 ./scripts/release-check.sh
-XC_API_BASE_URL=https://removed-parallel-joke-complications.trycloudflare.com \
+XC_API_BASE_URL=https://reservoir-expired-concord-handed.trycloudflare.com \
 xcodebuild archive \
   -project XiangChao.xcodeproj -scheme XiangChao -configuration Release \
   -destination 'generic/platform=iOS' \

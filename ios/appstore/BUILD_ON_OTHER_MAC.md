@@ -75,7 +75,7 @@ App Store Connect → TestFlight：
 
 ## 已经配好的东西
 
-- Release API：`https://removed-parallel-joke-complications.trycloudflare.com`
+- Release API：`https://reservoir-expired-concord-handed.trycloudflare.com`
 - 显示名：湘足
 - Bundle ID：`com.xiangchao.app`
 - 自绘队徽、无第三方资讯、无 AI

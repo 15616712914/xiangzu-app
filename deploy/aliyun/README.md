@@ -6,10 +6,10 @@
 ## 当前地址
 
 ```text
-API: https://removed-parallel-joke-complications.trycloudflare.com
-隐私: https://removed-parallel-joke-complications.trycloudflare.com/privacy.html
-支持: https://removed-parallel-joke-complications.trycloudflare.com/support.html
-后台: https://removed-parallel-joke-complications.trycloudflare.com/admin
+API: https://reservoir-expired-concord-handed.trycloudflare.com
+隐私: https://reservoir-expired-concord-handed.trycloudflare.com/privacy.html
+支持: https://reservoir-expired-concord-handed.trycloudflare.com/support.html
+后台: https://reservoir-expired-concord-handed.trycloudflare.com/admin
 ```
 
 管理员令牌保存在服务器：

@@ -15,7 +15,7 @@ settings:
     Debug:
       XC_API_BASE_URL: "http://127.0.0.1:8787"
     Release:
-      XC_API_BASE_URL: "https://removed-parallel-joke-complications.trycloudflare.com"
+      XC_API_BASE_URL: "https://reservoir-expired-concord-handed.trycloudflare.com"
 targets:
   XiangChao:
     type: application

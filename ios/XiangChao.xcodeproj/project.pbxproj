@@ -482,7 +482,7 @@
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
-				XC_API_BASE_URL = "https://removed-parallel-joke-complications.trycloudflare.com";
+				XC_API_BASE_URL = "https://reservoir-expired-concord-handed.trycloudflare.com";
 			};
 			name = Release;
 		};
