@@ -172,6 +172,18 @@
     </div>
 
     <main>
+      <section id="ai-panel" class="ai-panel">
+        <h2>AI 战报解析</h2>
+        <p class="muted">粘贴官方战报链接或正文。AI 只提取原文里出现的点球、现场人数和比分，不会猜。</p>
+        <div class="ai-grid">
+          <select id="ai-match"></select>
+          <input id="ai-url" placeholder="战报链接（可选）" />
+          <button id="ai-scan">AI 解析</button>
+        </div>
+        <textarea id="ai-text" placeholder="或者直接粘贴战报正文"></textarea>
+        <div id="ai-list" class="ai-list"></div>
+      </section>
+
       <table>
         <thead>
           <tr>
@@ -188,18 +200,6 @@
         </thead>
         <tbody id="rows"></tbody>
       </table>
-
-      <section id="ai-panel" class="ai-panel">
-        <h2>AI 战报解析</h2>
-        <p class="muted">粘贴官方战报链接或正文。AI 只提取原文里出现的点球、现场人数和比分，不会猜。</p>
-        <div class="ai-grid">
-          <select id="ai-match"></select>
-          <input id="ai-url" placeholder="战报链接（可选）" />
-          <button id="ai-scan">AI 解析</button>
-        </div>
-        <textarea id="ai-text" placeholder="或者直接粘贴战报正文"></textarea>
-        <div id="ai-list" class="ai-list"></div>
-      </section>
 
       <section id="log" class="log">
         <h2>最近操作</h2>
@@ -444,6 +444,9 @@
       $('ai-toggle').addEventListener('click', () => {
         $('ai-panel').classList.toggle('open')
         loadSuggestions()
+        if ($('ai-panel').classList.contains('open')) {
+          $('ai-panel').scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
       })
 
       $('ai-scan').addEventListener('click', async () => {
