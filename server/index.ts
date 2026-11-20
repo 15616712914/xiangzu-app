@@ -303,9 +303,10 @@ const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === resolv
 if (isDirectRun) {
   const port = Number(process.env.PORT || 8787)
   const token = process.env.ADMIN_TOKEN || DEFAULT_TOKEN
-  createApp().listen(port, () => {
-    console.log(`湘足 API http://127.0.0.1:${port}`)
-    console.log(`管理后台 http://127.0.0.1:${port}/admin`)
+  const host = process.env.HOST ?? '0.0.0.0'
+  createApp().listen(port, host, () => {
+    console.log(`湘足 API http://${host}:${port}`)
+    console.log(`管理后台 http://${host}:${port}/admin`)
     console.log(`管理令牌 ${token}`)
   })
 }
