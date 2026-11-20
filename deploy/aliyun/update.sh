@@ -35,7 +35,7 @@ for _ in $(seq 1 20); do
 done
 curl -fsS "http://127.0.0.1:$PORT/api/health" | grep -q '"matches"'
 
-echo "==> 安装每 10 分钟自动同步"
+echo "==> 安装每 2 分钟自动同步"
 cat > /etc/systemd/system/xiangzu-sync.service <<EOF
 [Unit]
 Description=Xiangzu official data sync
@@ -54,7 +54,7 @@ Description=Sync Xiangzu official data every 10 minutes
 
 [Timer]
 OnBootSec=2min
-OnUnitActiveSec=10min
+OnUnitActiveSec=2min
 Persistent=false
 
 [Install]

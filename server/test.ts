@@ -478,3 +478,68 @@ test('AI suggestion apply validates and writes match fields', () => {
   assert.equal(match.status, 'finished')
   assert.equal(applySuggestion(match, 'score', [21, 1]), false)
 })
+
+
+test('dongqiudi sync applies live score and status', async () => {
+  const originalFetch = globalThis.fetch
+  const store = {
+    updatedAt: '',
+    matches: [{
+      id: 'm736237',
+      round: 16,
+      phase: 'knockout',
+      stage: '半决赛首回合',
+      leg: 1,
+      date: '2026-11-21',
+      time: '19:38',
+      home: 'yz',
+      away: 'cs',
+      status: 'upcoming',
+      homeGoals: 0,
+      awayGoals: 0,
+      venue: '',
+      penalty: null,
+      startMinute: null,
+      attendance: 0,
+      events: [],
+      stats: { possession: [50, 50], shots: [0, 0], onTarget: [0, 0], corners: [0, 0], fouls: [0, 0] },
+    }],
+    squads: { yz: [], cs: [] },
+  } as any
+
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = String(input)
+    if (url.includes('sport-data.dongqiudi.com')) {
+      return new Response(JSON.stringify({
+        content: {
+          rounds: [],
+          matches: [{
+            match_id: '54649486',
+            team_A_name: '永州队',
+            team_B_name: '长沙队',
+            start_play: '2026-11-21 11:38:00',
+            status: 'Playing',
+            score_A: '1',
+            score_B: '0',
+            ps_A: '',
+            ps_B: '',
+          }],
+        },
+      }))
+    }
+    return new Response(JSON.stringify({ result: [] }))
+  }) as typeof fetch
+
+  try {
+    const result = await syncOfficial(store, {
+      force: true,
+      now: new Date('2026-11-21T20:05:00+08:00'),
+    })
+    assert.equal(store.matches[0].status, 'live')
+    assert.equal(store.matches[0].homeGoals, 1)
+    assert.equal(store.matches[0].awayGoals, 0)
+    assert.ok(result.matchesUpdated >= 1)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})

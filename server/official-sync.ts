@@ -48,7 +48,168 @@ const ROUND_IDS = [
   220224, 220223, 220225, 220227, 228360,
 ]
 
+const DQD_BASE = 'https://sport-data.dongqiudi.com/soccer/biz/data/schedule'
+const DQD_SEASON = 27752
+const DQD_ROUNDS = [560385, 561328]
+const DQD_TEAMS: Record<string, string> = {
+  长沙队: 'cs',
+  株洲队: 'zz',
+  湘潭队: 'xt',
+  衡阳队: 'hy',
+  邵阳队: 'sy',
+  岳阳队: 'yy',
+  常德队: 'cd',
+  张家界队: 'zjj',
+  益阳队: 'yiy',
+  郴州队: 'cz',
+  永州队: 'yz',
+  怀化队: 'hh',
+  娄底队: 'ld',
+  湘西队: 'xx',
+}
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+async function getJsonUrl(url: string): Promise<any> {
+  let lastError: unknown
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const res = await fetch(url, {
+        headers: { 'user-agent': UA },
+        signal: AbortSignal.timeout(15000),
+      })
+      if (!res.ok) throw new Error(`${url} -> ${res.status}`)
+      return await res.json()
+    } catch (error) {
+      lastError = error
+      if (attempt < 2) await sleep(700 * (attempt + 1))
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error('request failed')
+}
+
+function chinaDateAndTime(startPlay: string): { date: string; time: string } | null {
+  const parsed = new Date(`${startPlay.replace(' ', 'T')}Z`)
+  if (Number.isNaN(parsed.getTime())) return null
+  const china = new Date(parsed.getTime() + 8 * 60 * 60 * 1000)
+  return { date: china.toISOString().slice(0, 10), time: china.toISOString().slice(11, 16) }
+}
+
+async function syncDongqiudi(store: SyncStore, now: Date): Promise<{
+  handled: boolean
+  matchesUpdated: number
+  resultChanged: boolean
+  changes: string[]
+}> {
+  const rounds = new Set<number>(DQD_ROUNDS)
+  const rows = new Map<string, any>()
+
+  for (const roundId of [...rounds]) {
+    const data = await getJsonUrl(
+      `${DQD_BASE}?season_id=${DQD_SEASON}&round_id=${roundId}&app=dqd&platform=miniprogram&version=830`,
+    )
+    for (const round of data.content?.rounds ?? []) {
+      if (typeof round.params?.round_id === 'number' && !round.name?.startsWith('联赛')) {
+        rounds.add(round.params.round_id)
+      }
+    }
+    for (const match of data.content?.matches ?? []) rows.set(String(match.match_id), match)
+    await sleep(150)
+  }
+
+  for (const roundId of [...rounds].slice(DQD_ROUNDS.length)) {
+    const data = await getJsonUrl(
+      `${DQD_BASE}?season_id=${DQD_SEASON}&round_id=${roundId}&app=dqd&platform=miniprogram&version=830`,
+    )
+    for (const match of data.content?.matches ?? []) rows.set(String(match.match_id), match)
+    await sleep(150)
+  }
+
+  if (!rows.size) return { handled: false, matchesUpdated: 0, resultChanged: false, changes: [] }
+
+  const byKey = new Map<string, Match>()
+  for (const match of store.matches) {
+    byKey.set(`${match.date}-${match.home}-${match.away}`, match)
+    byKey.set(`${match.home}-${match.away}`, match)
+  }
+
+  let matchesUpdated = 0
+  let resultChanged = false
+  const changes: string[] = []
+
+  for (const row of rows.values()) {
+    const home = DQD_TEAMS[row.team_A_name]
+    const away = DQD_TEAMS[row.team_B_name]
+    if (!home || !away) continue
+    const when = chinaDateAndTime(String(row.start_play ?? ''))
+    const match = (when && byKey.get(`${when.date}-${home}-${away}`)) || byKey.get(`${home}-${away}`)
+    if (!match) continue
+
+    const status = String(row.status ?? '')
+    if (status === 'Postponed' || status === 'Cancelled') continue
+
+    if (status === 'Played') {
+      const score = parseScore(row.fs_A !== '' && row.fs_B !== '' ? `${row.fs_A}:${row.fs_B}` : `${row.score_A}:${row.score_B}`)
+      if (!score) continue
+      const penalty = parseScore(`${row.ps_A ?? ''}:${row.ps_B ?? ''}`)
+      const penaltyChanged = penalty !== null && JSON.stringify(penalty) !== JSON.stringify(match.penalty ?? null)
+      if (match.status !== 'finished' || match.homeGoals !== score[0] || match.awayGoals !== score[1] || penaltyChanged) {
+        changes.push(`${match.id} ${match.home}/${match.away} -> ${score[0]}:${score[1]} finished${penalty ? ` pen ${penalty.join(':')}` : ''}`)
+        match.homeGoals = score[0]
+        match.awayGoals = score[1]
+        match.status = 'finished'
+        match.startMinute = undefined
+        if (penalty) match.penalty = penalty
+        matchesUpdated += 1
+        resultChanged = true
+      }
+      continue
+    }
+
+    if (status === 'Fixture') {
+      if (match.status === 'finished') continue
+      const start = new Date(`${match.date}T${match.time}:00+08:00`)
+      if (now < start) {
+        if (match.status !== 'upcoming') {
+          match.status = 'upcoming'
+          match.startMinute = undefined
+          matchesUpdated += 1
+          changes.push(`${match.id} ${home}/${away} -> upcoming`)
+        }
+      } else if (now.getTime() <= start.getTime() + 6 * 60 * 60 * 1000) {
+        // The source sometimes keeps "Fixture" after kickoff; the app still needs live.
+        match.status = 'live'
+        match.startMinute = undefined
+        const liveScore = parseScore(`${row.score_A ?? ''}:${row.score_B ?? ''}`)
+        if (liveScore) {
+          match.homeGoals = liveScore[0]
+          match.awayGoals = liveScore[1]
+        }
+        matchesUpdated += 1
+        changes.push(`${match.id} ${home}/${away} live ${match.homeGoals}:${match.awayGoals}`)
+      }
+      continue
+    }
+
+    // Live statuses (Playing/FirstHalf/HalfTime/SecondHalf/ExtraTime/PenaltyShootout...)
+    const liveScore = parseScore(`${row.score_A ?? ''}:${row.score_B ?? ''}`)
+    const previous = `${match.status}-${match.homeGoals}:${match.awayGoals}`
+    match.status = 'live'
+    match.startMinute = undefined
+    if (liveScore) {
+      match.homeGoals = liveScore[0]
+      match.awayGoals = liveScore[1]
+    }
+    const livePenalty = parseScore(`${row.ps_A ?? ''}:${row.ps_B ?? ''}`)
+    if (livePenalty) match.penalty = livePenalty
+    if (`${match.status}-${match.homeGoals}:${match.awayGoals}` !== previous) {
+      matchesUpdated += 1
+      changes.push(`${match.id} ${home}/${away} live ${match.homeGoals}:${match.awayGoals}`)
+    }
+  }
+
+  return { handled: true, matchesUpdated, resultChanged, changes }
+}
 
 async function getJson(path: string): Promise<any> {
   let lastError: unknown
@@ -69,7 +230,9 @@ async function getJson(path: string): Promise<any> {
 }
 
 function parseScore(raw: unknown): [number, number] | null {
-  const [home, away] = String(raw ?? '').split(':').map(Number)
+  const text = String(raw ?? '').trim()
+  if (!/^\d+:\d+$/.test(text)) return null
+  const [home, away] = text.split(':').map(Number)
   return Number.isInteger(home) && Number.isInteger(away) ? [home, away] : null
 }
 
@@ -100,51 +263,64 @@ export async function syncOfficial(store: SyncStore, options: SyncOptions = {}):
     return { skipped: 'no match within the sync window', matchesUpdated: 0, playersUpdated: 0, changes: [] }
   }
 
-  const rows = new Map<number, any>()
-  for (const roundId of ROUND_IDS) {
-    const data = await getJson(`/competition/schedule?round_id=${roundId}&is_web_page=1`)
-    for (const row of data.result ?? []) rows.set(Number(row.match_id), row)
-    await sleep(120)
-  }
-
   const changes: string[] = []
   let matchesUpdated = 0
   let resultChanged = false
 
-  for (const match of store.matches) {
-    const row = rows.get(Number(match.id.replace(/^m/, '')))
-    if (!row) continue
+  let dqdHandled = false
+  try {
+    const dqd = await syncDongqiudi(store, now)
+    dqdHandled = dqd.handled
+    matchesUpdated += dqd.matchesUpdated
+    resultChanged = dqd.resultChanged
+    changes.push(...dqd.changes)
+  } catch (error) {
+    changes.push(`dongqiudi fallback: ${error instanceof Error ? error.message : 'failed'}`)
+  }
 
-    const score = parseScore(row.result)
-    if (score) {
-      if (match.status !== 'finished' || match.homeGoals !== score[0] || match.awayGoals !== score[1]) {
-        changes.push(`${match.id} ${match.home}/${match.away} ${match.homeGoals}:${match.awayGoals} -> ${score[0]}:${score[1]} finished`)
-        match.homeGoals = score[0]
-        match.awayGoals = score[1]
-        match.status = 'finished'
-        match.startMinute = undefined
-        matchesUpdated += 1
-        resultChanged = true
-      }
-      const penalties = parseScore(row.penalty_result)
-      if (penalties && !match.penalty) {
-        match.penalty = penalties
-        changes.push(`${match.id} penalty ${penalties[0]}:${penalties[1]}`)
-      }
-      continue
+  if (!dqdHandled) {
+    const rows = new Map<number, any>()
+    for (const roundId of ROUND_IDS) {
+      const data = await getJson(`/competition/schedule?round_id=${roundId}&is_web_page=1`)
+      for (const row of data.result ?? []) rows.set(Number(row.match_id), row)
+      await sleep(120)
     }
 
-    if (match.status === 'finished') continue
-    const start = kickoff(match)
-    if (!start) continue
-    // A postponed match should not stay "live" forever. Leave the status for the admin after 6h.
-    if (now.getTime() > start.getTime() + 6 * 60 * 60 * 1000) continue
-    const nextStatus = now < start ? 'upcoming' : 'live'
-    if (match.status !== nextStatus) {
-      match.status = nextStatus
-      if (nextStatus === 'live') match.startMinute = undefined
-      changes.push(`${match.id} ${match.home}/${match.away} status ${nextStatus}`)
-      matchesUpdated += 1
+    for (const match of store.matches) {
+      const row = rows.get(Number(match.id.replace(/^m/, '')))
+      if (!row) continue
+
+      const score = parseScore(row.result)
+      if (score) {
+        if (match.status !== 'finished' || match.homeGoals !== score[0] || match.awayGoals !== score[1]) {
+          changes.push(`${match.id} ${match.home}/${match.away} ${match.homeGoals}:${match.awayGoals} -> ${score[0]}:${score[1]} finished`)
+          match.homeGoals = score[0]
+          match.awayGoals = score[1]
+          match.status = 'finished'
+          match.startMinute = undefined
+          matchesUpdated += 1
+          resultChanged = true
+        }
+        const penalties = parseScore(row.penalty_result)
+        if (penalties && !match.penalty) {
+          match.penalty = penalties
+          changes.push(`${match.id} penalty ${penalties[0]}:${penalties[1]}`)
+        }
+        continue
+      }
+
+      if (match.status === 'finished') continue
+      const start = kickoff(match)
+      if (!start) continue
+      // A postponed match should not stay "live" forever. Leave the status for the admin after 6h.
+      if (now.getTime() > start.getTime() + 6 * 60 * 60 * 1000) continue
+      const nextStatus = now < start ? 'upcoming' : 'live'
+      if (match.status !== nextStatus) {
+        match.status = nextStatus
+        if (nextStatus === 'live') match.startMinute = undefined
+        changes.push(`${match.id} ${match.home}/${match.away} status ${nextStatus}`)
+        matchesUpdated += 1
+      }
     }
   }
 
