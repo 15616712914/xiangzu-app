@@ -51,12 +51,21 @@ const ROUND_IDS = [
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 async function getJson(path: string): Promise<any> {
-  const res = await fetch(BASE + path, {
-    headers: { 'user-agent': UA },
-    signal: AbortSignal.timeout(15000),
-  })
-  if (!res.ok) throw new Error(`${path} -> ${res.status}`)
-  return res.json()
+  let lastError: unknown
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const res = await fetch(BASE + path, {
+        headers: { 'user-agent': UA },
+        signal: AbortSignal.timeout(15000),
+      })
+      if (!res.ok) throw new Error(`${path} -> ${res.status}`)
+      return await res.json()
+    } catch (error) {
+      lastError = error
+      if (attempt < 2) await sleep(700 * (attempt + 1))
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error('official request failed')
 }
 
 function parseScore(raw: unknown): [number, number] | null {

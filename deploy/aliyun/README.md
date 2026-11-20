@@ -95,6 +95,30 @@ curl -X POST -H "x-admin-token: $TOKEN" \
   "http://127.0.0.1:$PORT/api/admin/sync-official?force=1&players=1"
 ```
 
+## AI 战报解析
+
+后台顶部「AI 建议」：
+
+1. 选一场已完场比赛
+2. 粘贴官方战报链接，或直接粘贴正文
+3. AI 解析出点球、现场人数、比分
+4. 逐条「采纳」或「忽略」
+
+前提：服务器 `/opt/xiangzu/api.env` 里要有 `DEEPSEEK_API_KEY`。
+
+```bash
+grep DEEPSEEK_API_KEY /opt/xiangzu/api.env
+```
+
+没有就补上，然后重启：
+
+```bash
+systemctl restart xiangzu-api
+curl -s http://127.0.0.1:8788/api/ai/status
+```
+
+当前官方赛程的 `match_report` 字段为空，所以 AI 不会凭空产出建议；需要你粘贴战报链接/正文。等官方开始提供战报后，可以再接自动扫描。
+
 ## 注意
 
 - 不要停掉或改 nginx，现有网站还在用它。

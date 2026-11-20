@@ -93,6 +93,29 @@
       }
       #rows .save:hover { background: var(--chili); }
       #rows .save:disabled { opacity: 0.45; cursor: default; }
+      .sync-status { font-size: 11px; color: var(--muted); margin-left: 4px; }
+      .sync-status.ok { color: #2f7d57; }
+      .sync-status.err { color: var(--chili); font-weight: 700; }
+      .ai-panel { display: none; margin-top: 18px; background: #fff; border-radius: 12px; padding: 16px; }
+      .ai-panel.open { display: block; }
+      .ai-panel h2 { font-size: 14px; margin: 0 0 6px; }
+      .ai-panel p { margin: 0 0 10px; }
+      .ai-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+      .ai-grid select { min-width: 220px; }
+      .ai-grid input { flex: 1; min-width: 220px; }
+      .ai-panel textarea {
+        width: 100%; min-height: 88px; margin-top: 8px; padding: 8px 10px;
+        border: 1px solid rgba(20, 16, 17, 0.14); border-radius: 6px;
+        font: inherit; font-size: 13px; resize: vertical;
+      }
+      .ai-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+      .ai-item { border: 1px solid rgba(20, 16, 17, 0.1); border-radius: 8px; padding: 10px 12px; }
+      .ai-item .ai-title { font-weight: 700; font-size: 13px; }
+      .ai-item .ai-meta { color: var(--muted); font-size: 11px; margin: 4px 0 8px; line-height: 1.5; }
+      .ai-item .ai-actions { display: flex; gap: 8px; }
+      .ai-item .ai-actions button { border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; }
+      .ai-item .accept { background: var(--ink); color: #fff; }
+      .ai-item .reject { background: #eee; color: var(--ink); }
       .toast {
         position: fixed;
         right: 20px;
@@ -131,6 +154,8 @@
       <input id="token" type="password" placeholder="管理令牌" autocomplete="off" />
       <input id="search" type="search" placeholder="搜索球队 / 轮次 / 日期" />
       <button id="sync">同步官方</button>
+      <span id="sync-status" class="sync-status"></span>
+      <button id="ai-toggle">AI 建议</button>
       <button id="refresh">刷新</button>
       <button id="log-toggle">操作记录</button>
     </div>
@@ -163,6 +188,18 @@
         </thead>
         <tbody id="rows"></tbody>
       </table>
+
+      <section id="ai-panel" class="ai-panel">
+        <h2>AI 战报解析</h2>
+        <p class="muted">粘贴官方战报链接或正文。AI 只提取原文里出现的点球、现场人数和比分，不会猜。</p>
+        <div class="ai-grid">
+          <select id="ai-match"></select>
+          <input id="ai-url" placeholder="战报链接（可选）" />
+          <button id="ai-scan">AI 解析</button>
+        </div>
+        <textarea id="ai-text" placeholder="或者直接粘贴战报正文"></textarea>
+        <div id="ai-list" class="ai-list"></div>
+      </section>
 
       <section id="log" class="log">
         <h2>最近操作</h2>
@@ -251,6 +288,8 @@
         matches = data.matches
         teamNames = Object.fromEntries(data.teams.map((team) => [team.id, team.city]))
         render()
+        fillAiMatches()
+        loadSyncStatus()
       }
 
       async function loadLog() {
@@ -338,6 +377,122 @@
         render()
       })
 
+      function fillAiMatches() {
+        const finished = matches.filter((m) => m.status === 'finished').slice(0, 12)
+        $('ai-match').innerHTML = finished
+          .map((m) => `<option value="${m.id}">${m.date} ${cityOf(m.home)} vs ${cityOf(m.away)} ${m.homeGoals}:${m.awayGoals}</option>`)
+          .join('')
+      }
+
+      function renderSuggestions(entries) {
+        const label = { penalty: '点球比分', attendance: '现场人数', score: '比分' }
+        if (!entries.length) {
+          $('ai-list').innerHTML = '<div class="muted">没有待处理建议。</div>'
+          return
+        }
+        $('ai-list').innerHTML = entries.map((entry) => {
+          const match = matches.find((m) => m.id === entry.matchId)
+          const teams = match ? `${cityOf(match.home)} vs ${cityOf(match.away)}` : entry.matchId
+          const before = Array.isArray(entry.before) ? entry.before.join(':') : entry.before
+          const after = Array.isArray(entry.after) ? entry.after.join(':') : entry.after
+          return `<div class="ai-item">
+            <div class="ai-title">${esc(teams)} · ${label[entry.field] || entry.field}</div>
+            <div class="ai-meta">当前 ${esc(before)} → 建议 ${esc(after)} · 置信度 ${Math.round(entry.confidence * 100)}%<br>${esc(entry.evidence || '')}<br>来源：${esc(entry.source)}</div>
+            <div class="ai-actions">
+              <button class="accept" data-id="${entry.id}" data-action="accept">采纳</button>
+              <button class="reject" data-id="${entry.id}" data-action="reject">忽略</button>
+            </div>
+          </div>`
+        }).join('')
+      }
+
+      async function loadSuggestions() {
+        if (!tokenInput.value) {
+          $('ai-list').innerHTML = '<div class="muted">先填入管理令牌。</div>'
+          return
+        }
+        const res = await fetch('/api/admin/suggestions', { headers: { 'x-admin-token': tokenInput.value } })
+        if (!res.ok) {
+          $('ai-list').innerHTML = '<div class="muted">令牌无效，无法读取建议。</div>'
+          return
+        }
+        renderSuggestions((await res.json()).entries)
+      }
+
+      async function loadSyncStatus() {
+        if (!tokenInput.value) return
+        const el = $('sync-status')
+        try {
+          const res = await fetch('/api/admin/sync-status', { headers: { 'x-admin-token': tokenInput.value } })
+          if (!res.ok) return
+          const { status } = await res.json()
+          if (!status) return
+          if (status.ok) {
+            el.className = 'sync-status ok'
+            el.textContent = `同步 ${new Date(status.at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
+            el.title = status.skipped || ''
+          } else {
+            el.className = 'sync-status err'
+            el.textContent = '同步失败'
+            el.title = status.error || ''
+          }
+        } catch {
+          // Status is optional; the table still works.
+        }
+      }
+
+      $('ai-toggle').addEventListener('click', () => {
+        $('ai-panel').classList.toggle('open')
+        loadSuggestions()
+      })
+
+      $('ai-scan').addEventListener('click', async () => {
+        if (!tokenInput.value) { toast('请先填入管理令牌'); return }
+        const button = $('ai-scan')
+        button.disabled = true
+        try {
+          const res = await fetch('/api/admin/suggestions/scan', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', 'x-admin-token': tokenInput.value },
+            body: JSON.stringify({
+              matchId: $('ai-match').value,
+              sourceUrl: $('ai-url').value.trim(),
+              text: $('ai-text').value.trim(),
+            }),
+          })
+          const data = await res.json()
+          if (!res.ok) throw new Error(data.error || 'AI 解析失败')
+          toast(data.created ? `生成 ${data.created} 条建议` : (data.reason || '没有新建议'))
+          await loadSuggestions()
+        } catch (e) {
+          toast(e.message)
+        } finally {
+          button.disabled = false
+        }
+      })
+
+      $('ai-list').addEventListener('click', async (event) => {
+        const button = event.target.closest('button[data-id]')
+        if (!button) return
+        if (!tokenInput.value) { toast('请先填入管理令牌'); return }
+        button.disabled = true
+        try {
+          const res = await fetch(`/api/admin/suggestions/${button.dataset.id}/${button.dataset.action}`, {
+            method: 'POST',
+            headers: { 'x-admin-token': tokenInput.value },
+          })
+          const data = await res.json()
+          if (!res.ok) throw new Error(data.error || '处理失败')
+          toast(button.dataset.action === 'accept' ? '已采纳并写入' : '已忽略')
+          await load()
+          await loadSuggestions()
+        } catch (e) {
+          toast(e.message)
+        } finally {
+          button.disabled = false
+        }
+      })
+
       $('sync').addEventListener('click', async () => {
         if (!tokenInput.value) {
           toast('请先填入管理令牌')
@@ -357,6 +512,7 @@
           } else {
             toast(`已同步：${data.matchesUpdated} 场比分，${data.playersUpdated} 名球员`)
             await load()
+            await loadSyncStatus()
           }
         } catch (e) {
           toast(e.message)

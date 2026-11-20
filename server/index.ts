@@ -12,6 +12,7 @@ import {
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import express, { type NextFunction, type Request, type Response } from 'express'
+import { randomUUID } from 'node:crypto'
 import cors from 'cors'
 import {
   CURRENT_ROUND,
@@ -25,6 +26,13 @@ import { createFansStore } from './fans'
 import { createFansRouter } from './fans-routes'
 import { createAIRouter } from './ai'
 import { syncOfficial, writeSyncLog } from './official-sync'
+import {
+  applySuggestion,
+  extractSuggestions,
+  fetchSourceText,
+  loadSuggestions,
+  saveSuggestions,
+} from './suggestions'
 
 export type StoreData = {
   updatedAt: string
@@ -207,6 +215,12 @@ export function createApp(
   })
 
   const adminLogFile = options.adminLogFile ?? resolve(dirname(dataFile), 'logs', 'admin.jsonl')
+  const suggestionsFile = resolve(dirname(dataFile), 'suggestions.json')
+  const syncStatusFile = resolve(dirname(dataFile), 'sync-status.json')
+  const writeSyncStatus = (status: Record<string, unknown>) => {
+    mkdirSync(dirname(syncStatusFile), { recursive: true })
+    writeFileSync(syncStatusFile, JSON.stringify({ ...status, at: new Date().toISOString() }, null, 2))
+  }
   const requireAdmin = (req: Request, res: Response): boolean => {
     if (req.header('x-admin-token') === adminToken) return true
     res.status(401).json({ error: 'invalid admin token' })
@@ -298,10 +312,107 @@ export function createApp(
       if (!result.skipped) {
         writeSyncLog(resolve(dirname(dataFile), 'logs', 'sync.jsonl'), result)
       }
+      writeSyncStatus({ ok: true, updatedAt: store.updatedAt, ...result })
       res.json({ ok: true, ...result, updatedAt: store.updatedAt })
     } catch (error) {
-      res.status(502).json({ error: error instanceof Error ? error.message : '官方同步失败' })
+      const message = error instanceof Error ? error.message : '官方同步失败'
+      writeSyncStatus({ ok: false, error: message })
+      res.status(502).json({ error: message })
     }
+  })
+
+  app.get('/api/admin/sync-status', (req, res) => {
+    if (!requireAdmin(req, res)) return
+    if (!existsSync(syncStatusFile)) return res.json({ status: null })
+    try {
+      res.json({ status: JSON.parse(readFileSync(syncStatusFile, 'utf8')) })
+    } catch {
+      res.json({ status: null })
+    }
+  })
+
+  app.get('/api/admin/suggestions', (req, res) => {
+    if (!requireAdmin(req, res)) return
+    const entries = loadSuggestions(suggestionsFile)
+      .filter((entry) => entry.status === 'pending')
+      .slice(-50)
+      .reverse()
+    res.json({ entries })
+  })
+
+  app.post('/api/admin/suggestions/scan', async (req, res) => {
+    if (!requireAdmin(req, res)) return
+    const match = store.matches.find((item) => item.id === req.body?.matchId)
+    if (!match) return res.status(404).json({ error: '比赛不存在' })
+    const text = typeof req.body?.text === 'string' ? req.body.text.trim() : ''
+    const sourceUrl = typeof req.body?.sourceUrl === 'string' ? req.body.sourceUrl.trim() : ''
+    if (!text && !sourceUrl) return res.status(400).json({ error: '请提供战报链接或正文' })
+    const apiKey = options.ai?.apiKey ?? process.env.DEEPSEEK_API_KEY
+    if (!apiKey) return res.status(503).json({ error: 'AI 未配置' })
+
+    try {
+      const content = text || (await fetchSourceText(sourceUrl))
+      const items = await extractSuggestions({
+        match,
+        text: content,
+        source: sourceUrl || '手动粘贴',
+        apiKey,
+        model: options.ai?.model ?? process.env.DEEPSEEK_MODEL,
+        baseUrl: options.ai?.baseUrl ?? process.env.DEEPSEEK_BASE_URL,
+      })
+      if (!items.length) return res.json({ ok: true, created: 0, reason: '战报里没有与当前数据不同的字段' })
+      const created = items.map((item) => ({
+        ...item,
+        id: randomUUID(),
+        matchId: match.id,
+        createdAt: new Date().toISOString(),
+        status: 'pending' as const,
+      }))
+      const all = [...loadSuggestions(suggestionsFile), ...created]
+      saveSuggestions(suggestionsFile, all)
+      res.json({ ok: true, created: created.length, entries: created })
+    } catch (error) {
+      res.status(502).json({ error: error instanceof Error ? error.message : 'AI 解析失败' })
+    }
+  })
+
+  app.post('/api/admin/suggestions/:id/:action', (req, res) => {
+    if (!requireAdmin(req, res)) return
+    const { id, action } = req.params
+    if (action !== 'accept' && action !== 'reject') {
+      return res.status(400).json({ error: '操作无效' })
+    }
+    const all = loadSuggestions(suggestionsFile)
+    const entry = all.find((item) => item.id === id)
+    if (!entry || entry.status !== 'pending') {
+      return res.status(404).json({ error: '建议不存在或已处理' })
+    }
+    const match = store.matches.find((item) => item.id === entry.matchId)
+    if (!match) return res.status(404).json({ error: '比赛不存在' })
+
+    if (action === 'accept') {
+      if (!applySuggestion(match, entry.field, entry.after)) {
+        return res.status(400).json({ error: '建议数据不合法' })
+      }
+      backupFile(dataFile, 'data', 20)
+      saveStore(dataFile, store)
+      appendFileSync(
+        adminLogFile,
+        `${JSON.stringify({
+          at: store.updatedAt,
+          matchId: match.id,
+          action: 'accept-ai-suggestion',
+          field: entry.field,
+          before: entry.before,
+          after: entry.after,
+          ip: req.ip,
+        })}\n`,
+      )
+    }
+
+    entry.status = action === 'accept' ? 'accepted' : 'rejected'
+    saveSuggestions(suggestionsFile, all)
+    res.json({ ok: true, match, entry })
   })
 
   app.get('/admin', (_req, res) => {

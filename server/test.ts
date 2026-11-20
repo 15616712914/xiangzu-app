@@ -6,6 +6,7 @@ import { join } from 'node:path'
 import { createApp } from './index'
 import { createFansStore, isVoteLocked } from './fans'
 import { syncOfficial } from './official-sync'
+import { applySuggestion } from './suggestions'
 
 const dir = mkdtempSync(join(tmpdir(), 'xiangchao-server-'))
 const dataFile = join(dir, 'data.json')
@@ -450,4 +451,30 @@ test('official sync updates finished scores, live status and player stats', asyn
   } finally {
     globalThis.fetch = originalFetch
   }
+})
+
+
+test('AI suggestion apply validates and writes match fields', () => {
+  const match = {
+    id: 'm1',
+    status: 'upcoming',
+    homeGoals: 0,
+    awayGoals: 0,
+    penalty: null,
+    attendance: 0,
+  } as any
+
+  assert.equal(applySuggestion(match, 'penalty', [7, 6]), true)
+  assert.deepEqual(match.penalty, [7, 6])
+  assert.equal(applySuggestion(match, 'penalty', [99, 6]), false)
+
+  assert.equal(applySuggestion(match, 'attendance', 12800), true)
+  assert.equal(match.attendance, 12800)
+  assert.equal(applySuggestion(match, 'attendance', -1), false)
+
+  assert.equal(applySuggestion(match, 'score', [2, 1]), true)
+  assert.equal(match.homeGoals, 2)
+  assert.equal(match.awayGoals, 1)
+  assert.equal(match.status, 'finished')
+  assert.equal(applySuggestion(match, 'score', [21, 1]), false)
 })
